@@ -11,7 +11,7 @@ def send(user_input: str, name: str, sys_prompt: str, version: str) -> str:
     # System Message
     system_message = {
         'role': 'system',
-        'content': 'You are a friendly assistant, named {}. {}. Your web interface is powered by Komli Version {}.'.format(name, sys_prompt, version)
+        'content': 'You are a friendly assistant, named {}. {}. The web interface is powered by Komli Version {}.'.format(name, sys_prompt, version)
     }
     # Define the user
     user_message = {
