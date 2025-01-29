@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with Komli</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #333;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #444;
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .chatbox {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .chatbox input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+        .chatbox button {
+            padding: 10px;
+            background: #119900;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chatbox button:hover {
+            background: #0c7500;
+        }
+        .chat-area {
+            background: #fff;
+            color: #000;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        </style>
+    <script>
+        function sendMessage() {
+            var userInput = document.getElementById('user_input').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/respond', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var chatArea = document.querySelector('.chat-area');
+                    var userMessage = document.createElement('p');
+                    userMessage.innerHTML = `<b>You:</b> ${userInput}`;
+                    chatArea.appendChild(userMessage);
+
+                    var komliResponse = document.createElement('p');
+                    komliResponse.innerHTML = xhr.responseText;
+                    chatArea.appendChild(komliResponse);
+
+                    document.getElementById('user_input').value = '';
+                }
+            };
+            xhr.send('user_input=' + encodeURIComponent(userInput));
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Chat with Komli</h1>
+        <div class="chat-area"></div>
+        <div class="chatbox">
+            <input type="text" id="user_input" placeholder="Message Komli...">
+            <button class="sendbtn" onclick="sendMessage()"><i class="fa fa-send"></button>
+        </div>
+    </div>
+</body>
+</html>
