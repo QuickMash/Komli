@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 
 name = os.name
 install_ollama = None
@@ -36,8 +37,12 @@ if name == "nt":
             with open(file_path, 'wb') as file:
                 file.write(response.content)
             print('File downloaded successfully')
+            time.sleep(.5)
+            print("Installing...")
+            os.system("OllamaSetup.exe")
         else:
-            print('Failed to download file')
+            print('Failed to download file, try again later...')
+            quit()
 else:
     os.system("clear")
     print("Welcome to the Unix/Linux/Mac Komli Installer!")
