@@ -21,6 +21,4 @@ def send(user_input: str, name: str, sys_prompt: str, version: str) -> str:
     messages = [system_message, user_message]
     response = chat(model=aimodel, messages=messages)
     
-    # Ensure the response is in JSON forma
-    
     return response.message.content

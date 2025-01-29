@@ -6,28 +6,47 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #333;
+            background: linear-gradient(135deg, #001f3f, #004080);
             color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .container {
             max-width: 600px;
-            margin: 0 auto;
+            width: 100%;
             padding: 20px;
-            background: #444;
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         h1 {
             text-align: center;
         }
+        .chat-area {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            scroll-behavior: smooth;
+        }
         .chatbox {
             display: flex;
-            margin-bottom: 20px;
         }
         .chatbox input {
             flex: 1;
             padding: 10px;
             border-radius: 5px;
             border: none;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            outline: none;
         }
         .chatbox button {
             padding: 10px;
@@ -40,19 +59,24 @@
         .chatbox button:hover {
             background: #0c7500;
         }
-        .chat-area {
-            background: #fff;
-            color: #000;
+        .scroll-bottom {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
             padding: 10px;
-            border-radius: 5px;
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
         }
-        </style>
+    </style>
     <script>
         function sendMessage() {
             var userInput = document.getElementById('user_input').value;
+            if (userInput.trim() === "") return;
+            
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/respond', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -62,16 +86,41 @@
                     var userMessage = document.createElement('p');
                     userMessage.innerHTML = `<b>You:</b> ${userInput}`;
                     chatArea.appendChild(userMessage);
-
+                    
                     var komliResponse = document.createElement('p');
                     komliResponse.innerHTML = xhr.responseText;
                     chatArea.appendChild(komliResponse);
-
+                    
                     document.getElementById('user_input').value = '';
+                    chatArea.scrollTop = chatArea.scrollHeight;
                 }
             };
             xhr.send('user_input=' + encodeURIComponent(userInput));
         }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            var chatArea = document.querySelector('.chat-area');
+            var scrollButton = document.getElementById("scroll-bottom");
+            
+            chatArea.addEventListener("scroll", function() {
+                if (chatArea.scrollTop + chatArea.clientHeight < chatArea.scrollHeight) {
+                    scrollButton.style.display = "block";
+                } else {
+                    scrollButton.style.display = "none";
+                }
+            });
+            
+            document.getElementById("user_input").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            scrollButton.addEventListener("click", function() {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            });
+        });
     </script>
 </head>
 <body>
@@ -80,8 +129,9 @@
         <div class="chat-area"></div>
         <div class="chatbox">
             <input type="text" id="user_input" placeholder="Message Komli...">
-            <button class="sendbtn" onclick="sendMessage()"><i class="fa fa-send"></button>
+            <button class="sendbtn" onclick="sendMessage()"><i class="fa fa-send"></i></button>
         </div>
+        <button id="scroll-bottom" class="scroll-bottom"><i class="fa fa-arrow-down"></i></button>
     </div>
 </body>
 </html>
