@@ -1,2 +1,3 @@
 # Komli AI
-An ai assistant that use OLLAMA Models on a Web Chat App.
+
+Komli is a conversational AI Web app, that was made with Python.
