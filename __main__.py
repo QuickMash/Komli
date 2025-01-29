@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, jsonify
 import threading
 import os
 import signal
-import systemz
+import ai
 import time
 
 config = {}
@@ -20,7 +20,7 @@ for key in required_keys:
     if key not in config:
         raise ValueError(f"Missing required config key: {key}")
 
-systemz.configure(config['name'], config['webdir'], config['model'], config['system_prompt'], config['version'])
+ai.configure(config['name'], config['webdir'], config['model'], config['system_prompt'], config['version'])
 
 app = Flask(__name__)
 
@@ -44,7 +44,7 @@ def home():
 @app.route('/respond', methods=['POST'])
 def respond():
     user_input = request.form.get('user_input')
-    system_response = systemz.send(user_input, config['name'], config['system_prompt'], config['version'])
+    system_response = ai.send(user_input, config['name'], config['system_prompt'], config['version'])
     return f'Komli: {system_response}'
 
 if __name__ == '__main__':
