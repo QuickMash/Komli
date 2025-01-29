@@ -1,20 +1,20 @@
 from flask import Flask, request, render_template, jsonify
+import threading
 import os
+import signal
 import systemz
+import time
 
 config = {}
 
-# Read the config file
 with open('config.cfg') as f:
     for line in f:
-        # Ignore empty lines and comments
         if line.strip() and not line.startswith('#'):
             key, value = line.split('=', 1)
             key = key.strip()
             value = value.split('#', 1)[0].strip().strip('"')
             config[key] = value
 
-# Ensure all required config values are present
 required_keys = ['name', 'webdir', 'model', 'system_prompt', 'version']
 for key in required_keys:
     if key not in config:
@@ -24,17 +24,41 @@ systemz.configure(config['name'], config['webdir'], config['model'], config['sys
 
 app = Flask(__name__)
 
+stop_event = threading.Event()
+
+def serve_function():
+    while not stop_event.is_set():
+        os.system("ollama serve")
+        stop_event.wait(1)
+
+def handle_signal(signum, frame):
+    stop_event.set()
+
+signal.signal(signal.SIGINT, handle_signal)
+signal.signal(signal.SIGTERM, handle_signal)
+
 @app.route(config["webdir"])
 def home():
     return render_template('index.html')
 
 @app.route('/respond', methods=['POST'])
 def respond():
-    user_input = request.form.get('user_input')  # Get user input from the form
-    print(f'User sent: {user_input}')  # Print user input to the console
-    system_response = systemz.send(user_input, config['name'], config['system_prompt'], config['version'])  # Pass the required arguments
+    user_input = request.form.get('user_input')
+    system_response = systemz.send(user_input, config['name'], config['system_prompt'], config['version'])
     return f'Komli: {system_response}'
 
 if __name__ == '__main__':
     os.system("clear")
-    app.run(debug=True, use_reloader=True)
+    time.sleep(0.5)
+    def start_app():
+        app.run(debug=True, use_reloader=False)
+
+    app_thread = threading.Thread(target=start_app)
+    app_thread.start()
+
+    try:
+        print("Starting Ollama...")
+        os.system("ollama serve")
+    finally:
+        stop_event.set()
+        app_thread.join()
