@@ -1,5 +1,7 @@
 import os
 
+
+
 markdown_enabled = False
 markdown_install_fail = False
 
@@ -12,9 +14,7 @@ def configure(markdown_status):
     else:
         print("Unknown Setting")
         markdown_enabled = False
-
-configure("yes")  # Example to set markdown_enabled, can be changed as needed
-
+configure("yes")
 if markdown_enabled:
     try:
         import markdown
@@ -22,7 +22,7 @@ if markdown_enabled:
         print("Markdown failed to import.\nAttempting to install it.")
         try:
             os.system("pip install markdown")
-            import markdown  # Try importing again after installation
+            import markdown
         except:
             print("Error: Could Not install Markdown\nUsing basic built-in interpreting")
             markdown_install_fail = True
@@ -35,6 +35,7 @@ def basic_markdown_to_html(text):
 def convert(text):
     if markdown_enabled and not markdown_install_fail:
         print("Converting to Markdown...")
+        print("Using normal markdown processor")
         return markdown.markdown(text)
     else:
         print("Using basic Markdown to HTML conversion...")

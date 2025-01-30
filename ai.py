@@ -2,7 +2,7 @@ from ollama import chat
 from ollama import ChatResponse
 import json
 
-aimodel = "qwen:0.5b"
+aimodel="qwen-coder:0.5b"
 
 def configure(name, webdir, aimodel, sys_prompt, version):
     print(name, webdir, aimodel, sys_prompt, version)
