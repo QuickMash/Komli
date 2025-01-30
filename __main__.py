@@ -4,6 +4,7 @@ import os
 import signal
 import ai
 import time
+import processing.mdprocessor as md
 
 config = {}
 
@@ -15,12 +16,13 @@ with open('config.cfg') as f:
             value = value.split('#', 1)[0].strip().strip('"')
             config[key] = value
 
-required_keys = ['name', 'webdir', 'model', 'system_prompt', 'version']
+required_keys = ['name', 'webdir', 'model', 'system_prompt', 'version', 'markdown']
 for key in required_keys:
     if key not in config:
         raise ValueError(f"Missing required config key: {key}")
 
 ai.configure(config['name'], config['webdir'], config['model'], config['system_prompt'], config['version'])
+md.configure(config["markdown"])
 
 app = Flask(__name__)
 
@@ -45,7 +47,8 @@ def home():
 def respond():
     user_input = request.form.get('user_input')
     system_response = ai.send(user_input, config['name'], config['system_prompt'], config['version'])
-    return f'Komli: {system_response}'
+    markdown_response = md.convert(system_response)
+    return f'Komli: {markdown_response}'
 
 if __name__ == '__main__':
     os.system("clear")

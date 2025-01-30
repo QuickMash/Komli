@@ -13,7 +13,7 @@ def ollama_getValue():
     if install_ollama in ["yes", ""]:
         install_ollama = True
     elif install_ollama == "no":
-        print("Ollama is required to run, make sure it is installed before running Komli")
+        print("Ollama is required to run, make sure it is installed before running Komli.")
         install_ollama = False
     else:
         print("Unknown Input, try again")
@@ -26,6 +26,37 @@ def askconfig():
     config['ai_name'] = input("Enter the name for your assistant? Default is [Komli] ").strip() or 'Komli'
     config['model'] = input("Enter the name of the model you want to use? Default is [qwen:0.5b] ").strip() or 'qwen:0.5b'
     config['sys_prompt'] = input("Enter the system prompt? Default is [You are a friendly assistant] ").strip() or 'You are a friendly assistant'
+    config['markdown'] = input("Enable Markdown? Default is [Yes]/No").strip or 'yes'
+    if input("Download Python Modules? [Yes]/No").strip().lower in ["yes", ""]:
+        try:
+            os.system("pip install requests")
+        except:
+            print("Failed to install Requests")
+            error_count =+1
+        try:
+            os.system("pip install ollama")
+        except:
+            print("Failed to install Ollama(Python Module)")
+            error_count =+1
+        try:
+            os.system("pip install flask")
+        except:
+            print("Failed to install Flask")
+            error_count =+1
+        try:
+            os.system("pip install signal")
+        except:
+            print("Failed to install Signal")
+            error_count =+1
+        if error_count == 4:
+            install_status = "failed"
+        elif error_count >= 1:
+            install_status = "okay"
+        else:
+            install_status = "success"
+        
+        print(f"{error_count} errors occurred, {install_status}!")
+
     ollama_getValue()
     if input("Save Config? [Yes]/No ").strip().lower() in ["yes", ""]:
         setConfig()
@@ -38,6 +69,7 @@ def setConfig():
         f.write(f'webdir = "{config["webdir"]}" # The Web Directory\n')
         f.write(f'model = "{config["model"]}" # AI Model to use\n')
         f.write(f'system_prompt = "{config["sys_prompt"]}" # System Prompt\n')
+        f.write(f'markdown = "{config["markdown"]}" # Enable markdown? yes or no\n')
         f.write(f'version = "{version}" # Do not Change\n')
     print(f'Configuration saved to {config_file}')
 
