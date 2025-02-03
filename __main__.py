@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, jsonify
+from markupsafe import Markup  # Correct import
 import threading
 import os
 import signal
@@ -22,16 +23,10 @@ for key in required_keys:
         raise ValueError(f"Missing required config key: {key}")
 
 ai.configure(config['name'], config['webdir'], config['model'], config['system_prompt'], config['version'])
-md.configure(config["markdown"])
 
 app = Flask(__name__)
 
 stop_event = threading.Event()
-
-def serve_function():
-    while not stop_event.is_set():
-        os.system("ollama serve")
-        stop_event.wait(1)
 
 def handle_signal(signum, frame):
     stop_event.set()
@@ -47,12 +42,17 @@ def home():
 def respond():
     user_input = request.form.get('user_input')
     system_response = ai.send(user_input, config['name'], config['system_prompt'], config['version'])
+    
+    # Convert Markdown to HTML, ensuring code blocks are correctly wrapped
     markdown_response = md.convert(system_response)
-    return f'Komli: {markdown_response}'
+    
+    # Use Markup to ensure safe rendering of HTML in templates
+    return Markup(f'Komli: {markdown_response}')
 
 if __name__ == '__main__':
     os.system("clear")
     time.sleep(0.5)
+
     def start_app():
         app.run(debug=True, use_reloader=False)
 
