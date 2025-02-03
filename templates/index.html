@@ -91,6 +91,16 @@
             cursor: pointer;
             display: none;
         }
+
+        ol,ul {
+            color: #ddd;
+        }
+        
+        li {
+            color:white;
+        }
+
+
     </style>
     <script>
         function sendMessage() {
@@ -107,7 +117,7 @@
             
             var typingIndicator = document.createElement('p');
             typingIndicator.className = 'typing-indicator';
-            typingIndicator.innerText = 'Komli is typing...';
+            typingIndicator.innerText = 'Komli is dieing...';
             chatArea.appendChild(typingIndicator);
             chatArea.scrollTop = chatArea.scrollHeight;
             
