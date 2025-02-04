@@ -26,6 +26,23 @@ def closedb():
         print("No database to close")
         return False
     
+def register(email, password):
+    db = opendb()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email, ))
+    user = cursor.fetchone()
+    if user:
+        return False
+    else:
+        cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, hasher.hash(password)))
+        db.commit()
+        return True
+        if config[TOKEN_LIMIT]["join_reward_enable"].strip('"') == "True":
+            cursor.execute("INSERT INTO tokens (user,value) VALUES (?, ?)", (email,config[TOKEN_LIMIT]["join_reward"]))
+            db.commit()
+            return True
+    
+    
 def login(email, password):
     db = opendb()
     cursor = db.cursor()
