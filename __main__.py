@@ -2,80 +2,67 @@ import os
 import signal
 import time
 import threading
+import configparser  # Use the built-in configparser module
 from flask import Flask, request, render_template, jsonify
 from markupsafe import Markup  # For safe HTML rendering
 import processing.ai as ai
 import processing.mdprocessor as md
+import datetime
 
-# Load configuration from 'config.cfg'
-config = {}
-with open('config.cfg') as f:
-    for line in f:
-        if line.strip() and not line.startswith('#'):  # Skip empty or comment lines
-            key, value = line.split('=', 1)
-            key = key.strip()
-            value = value.split('#', 1)[0].strip().strip('"')
-            config[key] = value
+config = configparser.ConfigParser()
+config.read("config.cfg")
 
-# Validate required configuration keys
-required_keys = ['name', 'webdir', 'model', 'system_prompt', 'version', 'markdown']
-for key in required_keys:
-    if key not in config:
-        raise ValueError(f"Missing required config key: {key}")
+webdir = str(config['Web']['webdir'].strip('"'))
+webport = int(config['Web']['port'].strip('"'))  # Ensure port is an integer
 
-# Configure AI based on the loaded settings
-ai.configure(config['name'], config['webdir'], config['model'], config['system_prompt'], config['version'])
-
-# Initialize Flask app
 app = Flask(__name__)
-
-# Event to stop the application gracefully
 stop_event = threading.Event()
 
-# Signal handler for clean shutdown
 def handle_signal(signum, frame):
     stop_event.set()
 
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-# Home route
-@app.route(config["webdir"])
+
+@app.route(webdir)
 def home():
     return render_template('index.html')
 
-# Response route for processing user input
-@app.route('/respond', methods=['POST'])
+@app.route(f'{webdir}/respond', methods=['POST'])
 def respond():
     user_input = request.form.get('user_input')
+    if not user_input:
+        return jsonify({"error": "No input provided"}), 400
     
-    # Get AI's response to the user's input
-    system_response = ai.send(user_input, config['name'], config['system_prompt'], config['version'])
-    
-    # Convert the AI's Markdown response to HTML
-    markdown_response = md.convert(system_response)
-    
-    # Safely render the converted HTML in the template
-    return Markup(f'Komli: {markdown_response}')
+    try:
+        ai.modTokens("user", user_input)  # Fixed argument issue
+        system_response = ai.send(user_input)
+        markdown_response = md.convert(system_response)
+        return Markup(markdown_response)
+    except Exception as e:
+        return jsonify({"error": f"Failed: {e}"}), 500
 
-# Start the Flask app and Ollama server in separate threads
 if __name__ == '__main__':
-    os.system("clear")
+    if config['DEFAULT'].get('clean_console', 'False').strip('"') == "True":
+        os.system('cls' if os.name == 'nt' else 'clear')
+
     time.sleep(0.5)
 
-    # Function to start Flask app
     def start_app():
-        app.run(debug=True, use_reloader=False)
+        try:
+            app.run(debug=True, use_reloader=False, host='0.0.0.0', port=webport)
+        except Exception as e:
+            print(f"Failed to start app: {e}")
+            stop_event.set()
+            time.sleep(1)
+            quit(e)
 
-    # Run Flask app in a separate thread to avoid blocking
     app_thread = threading.Thread(target=start_app)
     app_thread.start()
 
     try:
-        # Start the Ollama server
-        print("Starting Ollama...")
         os.system("ollama serve")
     finally:
-        # Ensure proper shutdown of Flask app and Ollama server
         stop_event.set()
         app_thread.join()

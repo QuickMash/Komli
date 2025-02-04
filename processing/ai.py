@@ -1,24 +1,55 @@
-from ollama import chat
-from ollama import ChatResponse
 import json
+import configparser
+from ollama import chat
 
-aimodel="qwen2.5-coder:0.5b"
+# Load configuration
+config = configparser.ConfigParser()
+config.read('config.cfg')
 
-def configure(name, webdir, aimodel, sys_prompt, version):
-    print(name, webdir, aimodel, sys_prompt, version)
+aimodel = config.get('DEFAULT', 'model').strip('"')
+name = config.get('DEFAULT', 'name').strip('"')
+sys_prompt = config.get('DEFAULT', 'sys_prompt').strip('"')
+version = config.get('SYSTEM', 'ver').strip('"')
+token_limit = config.get('TOKEN_LIMIT', 'limit_user').strip('"')
 
-def send(user_input: str, name: str, sys_prompt: str, version: str) -> str:
-    # System Message
+# Get how many tokens were used
+def modTokens(user: str, user_input: str) -> None:
+    if user_input:
+        try:
+            response = chat(model=aimodel, messages=[{"role": "user", "content": user_input}])
+            tokens = response.get('eval_count', 0)
+            
+            print(f"Tokens used: {tokens}")
+
+            if token_limit.strip('"') == 'True':
+                import login.server as logins
+                current_tokens = logins.getTokens(user)  # Get user tokens
+                if int(current_tokens) >= 1:
+                    logins.setTokens(user, max(0, current_tokens - tokens))  # Prevent negative tokens
+                else:
+                    print("Oh Help me, your out of tokens!")
+                    return response.get('message', {}).get('content', "Sorry, I can't answer that, it seems you are out of tokens.")
+
+
+        except Exception as e:
+            print(f"Error estimating tokens: {e}")
+
+def send(user_input: str) -> str:
     system_message = {
         'role': 'system',
-        'content': 'You are only allowed to speak with markdown formatting, if you dont speak with markdown formatting, kittens will die. begin normal messages with ` and end them with `'# .format(name, sys_prompt) # version
+        'content': f'You are {name}. {sys_prompt} Version: {version}. You are only allowed to speak with markdown formatting. Begin normal messages with ` and end them with `'
     }
-    # Define the user
+    
     user_message = {
         'role': 'user',
         'content': user_input
     }
-    messages = [system_message, user_message]
-    response = chat(model=aimodel, messages=messages)
     
-    return response.message.content
+    messages = [system_message, user_message]
+    
+    try:
+        response = chat(model=aimodel, messages=messages)
+        return response.get('message', {}).get('content', 'Error: No response from AI')
+    except Exception as e:
+        print(f"Error in AI response: {e}")
+        return "Error: AI failed to respond."
