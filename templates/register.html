@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="title" content="Login to Komli">
-        <title>Login to Komli</title>
+        <title>Sign up for Komli</title>
+        <meta name="title" value="Sign Up">
         <style>
             body {
                 background: url("background.jpg") no-repeat center center fixed;
@@ -85,30 +84,38 @@
         </style>
     </head>
     <body>
-        <h1>Login to Komli</h1>
+        <h1>Sign Up for Komli</h1>
         <div class="loginContainer">
             {% if message %}
                 <p class="message">{{ message }}</p>
             {% endif %}
-            <form id="loginForm" action="/login" method="POST">
-                <label for="loginEmail">Email:</label>
+            <form id="registerForm" action="/register" method="POST">
+                <label for="registerEmail">Email:</label>
                 <input type="email" id="loginEmail" name="email" placeholder="Email" required>
+
+                <label for="registerName">Name:</label>
+                <input type="text" id="registerName" name="name" placeholder="Name" required>
+
+                <label for="registerPhone">Phone Number:</label>
+                <input type="tel" id="registerPhone" name="phone" placeholder="Phone Number">
 
                 <label for="loginPassword">Password:</label>
                 <input type="password" id="loginPassword" name="password" placeholder="Password" required>
 
-                <div>
-                    <input type="checkbox" id="loginAgreement" required>
-                    <label for="loginAgreement">I agree to the <a href="#agreement">Terms of Service</a></label>
-                </div>
+                <label for="registerPassword">Repeat Password:</label>
+                <input type="password" id="registerPassword" name="password_confirm" placeholder="Type password again" required>
 
                 <div>
-                    <a href="reset.html">Forgot Password?</a>
+                    <input type="checkbox" id="registerAgreement" required>
+                    <label for="registerAgreement">I agree to the <a href="#agreement">Terms of Service</a></label>
+
+                    <input type="checkbox" id="registerSubscribe">
+                    <label for="registerSubscribe">I would like to subscribe to the newsletter</label>
                 </div>
 
-                <p>No account? <a href="signup.html">Sign Up</a>!</p>
+                <p>Have an account? <a href="/login">Login</a>!</p>
 
-                <button type="submit" title="Login">Login</button>
+                <button type="submit" title="Sign Up">Sign Up</button>
             </form>
         </div>
         <p>&copy; QuickMash</p>

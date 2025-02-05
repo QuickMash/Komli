@@ -1,4 +1,3 @@
-import json
 import configparser
 from ollama import chat
 

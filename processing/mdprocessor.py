@@ -21,7 +21,7 @@ def restore_code_blocks(html, code_blocks):
         html = html.replace(
             f"<!--CODE_BLOCK_{codeblockid}-->",
             f'<div class="copybtn"><button onclick="copyToClipboard(\'codeblock-{codeblockid}\')" id="copybtn-{codeblockid}">copy <i class="fa-regular fa-copy"></i></button></div>'
-            f'<div class="codeblock"<pre><code id="codeblock-{codeblockid}">{block}</code></pre></div>'
+            f'<div class="codeblock"<code id="codeblock-{codeblockid}"><pre>{block}</pre></code></div>'
         )
         codeblockid += 1
     return html

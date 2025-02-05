@@ -5,7 +5,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqvGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         body {
             font-family: "Open Sans", sans-serif;
@@ -91,6 +91,12 @@
             cursor: pointer;
             display: none;
         }
+        
+        pre {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 10px;
+        }
 
 
     </style>
@@ -109,7 +115,7 @@
             
             var typingIndicator = document.createElement('p');
             typingIndicator.className = 'typing-indicator';
-            typingIndicator.innerText = 'Komli is dieing...';
+            typingIndicator.innerText = 'Komli is typing...';
             chatArea.appendChild(typingIndicator);
             chatArea.scrollTop = chatArea.scrollHeight;
             
