@@ -1,4 +1,4 @@
-# Komli 0.1.0
+# Komli AI
 
 ![GitHub commits since tagged version](https://img.shields.io/github/commits-since/QuickMash/Komli/0.1.0)
 ![GitHub Tag](https://img.shields.io/github/v/tag/QuickMash/Komli)
@@ -14,3 +14,10 @@ Komli is a conversational AI Web app, that was made with Python.
 3. Run `__main__.py`
 
 Run the installer in /installer/installer.py for easy config editing
+
+## Komli 0.1.0(Released)
+- The first publicly available version
+
+## Komli 0.1.1(Currently being developed)
+- Login support
+- markdown
