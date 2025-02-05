@@ -5,7 +5,7 @@
         <meta name="title" value="Sign Up">
         <style>
             body {
-                background: url("background.jpg") no-repeat center center fixed;
+                background: url("/background.jpg") no-repeat center center fixed;
                 background-size: cover;
                 color: white;
                 font-family: Arial, sans-serif;
@@ -89,7 +89,7 @@
             {% if message %}
                 <p class="message">{{ message }}</p>
             {% endif %}
-            <form id="registerForm" action="/register" method="POST">
+            <form id="registerForm" action="{{ webdir }}/register" method="POST">
                 <label for="registerEmail">Email:</label>
                 <input type="email" id="loginEmail" name="email" placeholder="Email" required>
 
@@ -103,7 +103,7 @@
                 <input type="password" id="loginPassword" name="password" placeholder="Password" required>
 
                 <label for="registerPassword">Repeat Password:</label>
-                <input type="password" id="registerPassword" name="password_confirm" placeholder="Type password again" required>
+                <input type="password" id="registerPassword" name="confirm_password" placeholder="Type password again" required>
 
                 <div>
                     <input type="checkbox" id="registerAgreement" required>
@@ -113,7 +113,7 @@
                     <label for="registerSubscribe">I would like to subscribe to the newsletter</label>
                 </div>
 
-                <p>Have an account? <a href="/login">Login</a>!</p>
+                <p>Have an account? <a href="{{ webdir }}/login">Login</a>!</p>
 
                 <button type="submit" title="Sign Up">Sign Up</button>
             </form>
