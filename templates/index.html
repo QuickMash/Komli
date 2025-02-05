@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: "Open Sans", sans-serif;
-            background: linear-gradient(136deg, #001f3f, #0070e0);
+            background: black;
             color: white;
             display: flex;
             justify-content: center;
@@ -18,14 +18,8 @@
             margin: 0;
         }
         .container {
-            max-width: 850px;
-            width: 800px;
+            height: 100%;
             padding: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            border: 1px solid #ffffff4d;
         }
         h1 {
             text-align: center;
@@ -97,8 +91,27 @@
             padding: 10px;
             border-radius: 10px;
         }
+        
+        .history-panel {
+            background: #222;
+            padding: 20px;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            overflow-y: auto;
+}
 
-
+        .userlistitem {
+            background: #333;
+            border-radius: 10px;
+            padding: 5px;
+            height: 100vh;
+            width: 30%;
+        }
     </style>
     <script>
         function sendMessage() {
@@ -150,6 +163,15 @@
     </script>
 </head>
 <body>
+    <div class="history-panel">
+        <ul>
+            
+        </ul>
+        <ul class="user-list">
+            <li class="userlistitem" id="settings-item"><a href=""><i class="fa fa-gear"></i> Settings</a></li>
+            <li class="userlistitem" id="account-item"><a href=""><i class="fa fa-user"></i> Account</a></li>
+        </ul>
+    </div>
     <div class="container">
         <h1>Chat with Komli</h1>
         <div class="chat-area">
