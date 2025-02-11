@@ -8,6 +8,8 @@
 
 Komli is a conversational AI Web app, that was made with Python.
 
+If you have any questions, feel free to DM me on discord, my username is `quickmash`
+
 ## How to use
 1. Run `/installer/installer.py` to edit configurations, and if needed, install ollama
 2. Install your model, by running `ollama run [Model Name]`
