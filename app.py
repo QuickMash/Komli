@@ -86,7 +86,6 @@ def register():
     else:
         if debug:
                 print("Passwords don't match")
-                print(password,"=", password_confirm)
         return render_template('register.html', message="Passwords do not match")        
 
 @app.route(f'{webdir}/respond', methods=['POST'])
