@@ -100,7 +100,8 @@ def respond():
         return Markup(markdown_response)
     except Exception as e:
         return jsonify({"error": f"Failed: {e}"}), 500
-    
+
+# For a random background
 @app.route(f'{webdir}/background.jpg')
 def background():
     print(server.listUsers())
