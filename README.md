@@ -19,6 +19,7 @@ Run the installer in /installer/installer.py for easy config editing
 
 ## Komli 0.1.0(Released)
 - The first publicly available version
+** Warning! ** If debug at the bottom of the file is set to true, SET IT TO FALSE.
 
 ## Komli 0.1.1(Currently being developed)
 - Login support
