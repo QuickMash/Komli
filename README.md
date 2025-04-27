@@ -20,7 +20,7 @@ If you have any questions, feel free to DM me on Discord. My username is `quickm
    ```
 3. Run the main application:
    ```bash
-   python app.py
+   python3 app.py
    ```
 
 Use the installer located at `/installer/installer.py` for easy configuration editing.
