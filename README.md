@@ -20,17 +20,17 @@ If you have any questions, feel free to DM me on Discord. My username is `quickm
    ```
 3. Run the main application:
    ```bash
-   python __main__.py
+   python app.py
    ```
 
-For easy configuration editing, use the installer located at `/installer/installer.py`.
+Use the installer located at `/installer/installer.py` for easy configuration editing.
 
 ---
 
 ## Komli 0.1.0 (Released)
 - The first publicly available version.
 
-**Warning:** If the `debug` setting at the bottom of the configuration file is set to `true`, make sure to set it to `false` before deployment.
+**Warning:** If the `debug` setting at the bottom of the configuration file is set to `true`, set it to `false` before deployment.
 
 ---
 
