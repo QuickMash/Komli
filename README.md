@@ -4,24 +4,36 @@
 ![GitHub Tag](https://img.shields.io/github/v/tag/QuickMash/Komli)
 ![GitHub last commit](https://img.shields.io/github/last-commit/QuickMash/Komli)
 
---------------
+---
 
-Komli is a conversational AI Web app, that was made with Python.
+**Komli** is a conversational AI web app built with Python.
 
-If you have any questions, feel free to DM me on discord, my username is `quickmash`
+If you have any questions, feel free to DM me on Discord. My username is `quickmash`.
 
-## How to use
-1. Run `/installer/installer.py` to edit configurations, and if needed, install ollama
-2. Install your model, by running `ollama run [Model Name]`
-3. Run `__main__.py`
+---
 
-Run the installer in /installer/installer.py for easy config editing
+## How to Use
+1. Run `/installer/installer.py` to edit configurations and, if needed, install Ollama.
+2. Install your model by running:
+   ```bash
+   ollama run [Model Name]
+   ```
+3. Run the main application:
+   ```bash
+   python __main__.py
+   ```
 
-## Komli 0.1.0(Released)
-- The first publicly available version
+For easy configuration editing, use the installer located at `/installer/installer.py`.
 
-**Warning!** If debug at the bottom of the file is set to true, SET IT TO FALSE.
+---
 
-## Komli 0.1.1(Currently being developed)
-- Login support
-- markdown
+## Komli 0.1.0 (Released)
+- The first publicly available version.
+
+**Warning:** If the `debug` setting at the bottom of the configuration file is set to `true`, make sure to set it to `false` before deployment.
+
+---
+
+## Komli 0.1.1 (In Development)
+- Login support.
+- Markdown rendering.
