@@ -1,137 +1,586 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with Komli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --dark-glass: rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: "Open Sans", sans-serif;
-            background: black;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            height: 100%;
-            padding: 60px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 45px;
-        }
-        .chat-area {
-            background: rgba(255, 255, 255, 0.3);
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            scroll-behavior: smooth;
-            border: 1px solid #ffffff66;
-        }
-        .chatbox {
-            display: flex;
-            gap: 10px;
-        }
-        .chatbox input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            background: rgba(255, 255, 255, 0.4);
-            color: white;
-            outline: none;
-        }
-        .chatbox input::placeholder {
-            color: #ececec;
-        }
-        .chatbox button {
-            padding: 12px;
-            background: #119900;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        .chatbox button:hover {
-            background: #0c7500;
-        }
-        .chatbox button:disabled {
-            background: #555;
-            cursor: not-allowed;
-        }
-        .typing-indicator {
-            font-style: italic;
-            color: #ddd;
-        }
-        .scroll-bottom {
-            position: absolute;
-            bottom: 80px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: none;
+            font-family: "Inter", sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
         
-        pre {
-            background-color: #333;
-            padding: 10px;
-            border-radius: 10px;
-        }
-        
-        .history-panel {
-            background: #222;
-            padding: 20px;
-            border-top-right-radius: 10px;
-            border-bottom-right-radius: 10px;
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .sidebar {
+            background: var(--dark-glass);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
             height: 100vh;
-            width: 250px;
+            position: fixed;
+            left: -280px;
+            width: 280px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar.active {
+            left: 0;
+        }
+        
+        .sidebar-toggle {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 1001;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            margin-left: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 100vh;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 48px);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        
+        .chat-header h1 {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        
+        .chat-area {
+            flex: 1;
+            padding: 32px;
             overflow-y: auto;
-}
-
-        .userlistitem {
-            background: #333;
-            border-radius: 10px;
-            padding: 5px;
-            height: 100vh;
-            width: 30%;
+            background: rgba(248, 250, 252, 0.8);
+            position: relative;
+        }
+        
+        .chat-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        
+        .message {
+            margin-bottom: 24px;
+            animation: messageSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message-content {
+            padding: 16px 20px;
+            border-radius: 20px;
+            max-width: 75%;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .message.user {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .message.user .message-content {
+            background: var(--primary-gradient);
+            color: white;
+            border-bottom-right-radius: 8px;
+        }
+        
+        .message.bot {
+            display: flex;
+            justify-content: flex-start;
+        }
+        
+        .message.bot .message-content {
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .message-header {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: #6b7280;
+            font-style: italic;
+            background: white;
+            border-radius: 20px;
+            border-bottom-left-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            max-width: 200px;
+            animation: messageSlide 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typingDot {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .chat-input {
+            padding: 32px;
+            background: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-container {
+            position: relative;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .input-field {
+            flex: 1;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+            background: rgba(248, 250, 252, 0.8);
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+        
+        .send-button {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .sidebar-nav {
+            padding: 24px;
+        }
+        
+        .sidebar-brand {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .sidebar-brand h5 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .nav-item {
+            margin-bottom: 8px;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(4px);
+        }
+        
+        .nav-link.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .codeblock {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-family: "JetBrains Mono", monospace;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .codeblock::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .codeblock::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .codeblock::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .copy-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -100%;
+                width: 100%;
+            }
+            
+            .main-content {
+                padding: 12px;
+            }
+            
+            .chat-container {
+                height: calc(100vh - 24px);
+                border-radius: 16px;
+            }
+            
+            .chat-header {
+                padding: 24px 20px;
+            }
+            
+            .chat-area {
+                padding: 20px;
+            }
+            
+            .chat-input {
+                padding: 20px;
+            }
+            
+            .message-content {
+                max-width: 90%;
+            }
         }
     </style>
-    <script>
-        function sendMessage() {
-            var userInput = document.getElementById('user_input').value;
-            if (userInput.trim() === "") return;
+</head>
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-nav">
+            <div class="sidebar-brand">
+                <h5><i class="fas fa-robot me-2"></i>Komli</h5>
+            </div>
             
-            var chatArea = document.querySelector('.chat-area');
-            var userMessage = document.createElement('p');
-            userMessage.innerHTML = `<b>You:</b> ${userInput}`;
+            <nav class="nav flex-column">
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-comments"></i>
+                    <span>Current Chat</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-plus"></i>
+                    <span>New Chat</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-history"></i>
+                    <span>Chat History</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="mt-auto p-4">
+            <nav class="nav flex-column">
+                <a href="/settings" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="/profile" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+                <a href="/logout" class="nav-link text-danger">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-10">
+                    <div class="chat-container">
+                        <!-- Chat Header -->
+                        <div class="chat-header">
+                            <h1><i class="fas fa-robot me-3"></i>Komli</h1>
+                            <p class="mb-0 opacity-90">Your intelligent AI assistant</p>
+                        </div>
+                        
+                        <!-- Chat Area -->
+                        <div class="chat-area" id="chatArea">
+                            <div class="message bot">
+                                <div class="message-content">
+                                    <div class="message-header">
+                                        <i class="fas fa-robot text-primary"></i>
+                                        <span>Komli</span>
+                                    </div>
+                                    <div>Hello! I'm Komli, your AI assistant. How can I help you today?</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Input -->
+                        <div class="chat-input">
+                            <div class="input-container">
+                                <textarea 
+                                    class="input-field" 
+                                    id="user_input" 
+                                    placeholder="Type your message here..." 
+                                    rows="1"
+                                    onkeypress="handleKeyPress(event)"
+                                    oninput="autoResize(this)"></textarea>
+                                <button class="send-button" type="button" id="sendBtn" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === "Enter" && !event.shiftKey && !document.getElementById('sendBtn').disabled) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function sendMessage() {
+            var userInput = document.getElementById('user_input').value.trim();
+            if (userInput === "") return;
+            
+            var chatArea = document.getElementById('chatArea');
+            
+            // Add user message
+            var userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `
+                <div class="message-content">
+                    <div class="message-header">
+                        <i class="fas fa-user"></i>
+                        <span>You</span>
+                    </div>
+                    <div>${escapeHtml(userInput)}</div>
+                </div>
+            `;
             chatArea.appendChild(userMessage);
             
             document.getElementById('user_input').value = '';
-            document.querySelector('.sendbtn').disabled = true;
+            document.getElementById('user_input').style.height = 'auto';
+            document.getElementById('sendBtn').disabled = true;
             
-            var typingIndicator = document.createElement('p');
+            // Add typing indicator
+            var typingIndicator = document.createElement('div');
             typingIndicator.className = 'typing-indicator';
-            typingIndicator.innerText = 'Komli is typing...';
+            typingIndicator.innerHTML = `
+                <i class="fas fa-robot text-primary"></i>
+                <span>Komli is thinking</span>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
             chatArea.appendChild(typingIndicator);
             chatArea.scrollTop = chatArea.scrollHeight;
             
+            // Send request to server
             setTimeout(function() {
                 var xhr = new XMLHttpRequest();
                 xhr.open('POST', '/respond', true);
@@ -139,10 +588,20 @@
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         chatArea.removeChild(typingIndicator);
-                        var komliResponse = document.createElement('p');
-                        komliResponse.innerHTML = `<b>Komli:</b> ${xhr.responseText}`;
+                        
+                        var komliResponse = document.createElement('div');
+                        komliResponse.className = 'message bot';
+                        komliResponse.innerHTML = `
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <i class="fas fa-robot text-primary"></i>
+                                    <span>Komli</span>
+                                </div>
+                                <div>${processMarkdown(xhr.responseText)}</div>
+                            </div>
+                        `;
                         chatArea.appendChild(komliResponse);
-                        document.querySelector('.sendbtn').disabled = false;
+                        document.getElementById('sendBtn').disabled = false;
                         chatArea.scrollTop = chatArea.scrollHeight;
                     }
                 };
@@ -150,37 +609,60 @@
             }, 1000);
         }
         
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("user_input").addEventListener("keypress", function(event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    if (!document.querySelector('.sendbtn').disabled) {
-                        sendMessage();
-                    }
-                }
+        function escapeHtml(text) {
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+        
+        function processMarkdown(text) {
+            // Basic markdown processing
+            text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+                return `<div class="codeblock">
+                    <button class="copy-button" onclick="copyCode(this)">
+                        <i class="fas fa-copy me-1"></i>Copy
+                    </button>
+                    <pre><code>${escapeHtml(code.trim())}</code></pre>
+                </div>`;
             });
+            
+            text = text.replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px;">$1</code>');
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+        
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling.textContent;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                button.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy me-1"></i>Copy';
+                }, 2000);
+            });
+        }
+        
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.sidebar-toggle');
+            
+            if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target) && window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+        
+        // Auto-focus input on load
+        window.addEventListener('load', function() {
+            document.getElementById('user_input').focus();
         });
     </script>
-</head>
-<body>
-    <div class="history-panel">
-        <ul>
-            
-        </ul>
-        <ul class="user-list">
-            <li class="userlistitem" id="settings-item"><a href=""><i class="fa fa-gear"></i> Settings</a></li>
-            <li class="userlistitem" id="account-item"><a href=""><i class="fa fa-user"></i> Account</a></li>
-        </ul>
-    </div>
-    <div class="container">
-        <h1>Chat with Komli</h1>
-        <div class="chat-area">
-            <p><b>Komli:</b> Hi, I'm Komli</p>
-        </div>
-        <div class="chatbox">
-            <input type="text" id="user_input" placeholder="Message Komli...">
-            <button class="sendbtn" onclick="sendMessage()"><i class="fa fa-paper-plane"></i></button>
-        </div>
-    </div>
 </body>
 </html>
