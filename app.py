@@ -50,6 +50,10 @@ def home():
 def login_page():
     return render_template('login.html')
 
+@app.route(f'{webdir}/reset')
+def reset_pass():
+    return render_template('reset.html')
+
 @app.route(f'{webdir}/login', methods=['POST'])
 def login():
     email = request.form.get('email')
