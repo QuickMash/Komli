@@ -1,123 +1,387 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Sign up for Komli</title>
-        <meta name="title" value="Sign Up">
-        <style>
-            body {
-                background: url("/background.jpg") no-repeat center center fixed;
-                background-size: cover;
-                color: white;
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                height: 100vh;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Komli Account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Inter", sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .auth-body {
+            padding: 32px;
+        }
+        
+        .form-floating {
+            margin-bottom: 16px;
+        }
+        
+        .form-floating > .form-control {
+            background: rgba(248, 250, 252, 0.8);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            height: auto;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-floating > .form-control:focus {
+            background: white;
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        
+        .form-floating > .form-control.is-valid {
+            border-color: #10b981;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='m2.3 6.73.93-.93 1.18 1.18 2.63-2.63.93.93-3.56 3.56L2.3 6.73z'/%3e%3c/svg%3e");
+        }
+        
+        .form-floating > .form-control.is-invalid {
+            border-color: #ef4444;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
+        }
+        
+        .form-floating > label {
+            padding: 16px 20px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .form-check {
+            margin-bottom: 16px;
+        }
+        
+        .form-check-input:checked {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+        
+        .form-check-input:focus {
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-success:disabled {
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            font-size: 0.875rem;
+        }
+        
+        .strength-meter {
+            height: 4px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .strength-weak .strength-fill { width: 25%; background: #ef4444; }
+        .strength-fair .strength-fill { width: 50%; background: #f59e0b; }
+        .strength-good .strength-fill { width: 75%; background: #10b981; }
+        .strength-strong .strength-fill { width: 100%; background: #059669; }
+        
+        .auth-links {
+            text-align: center;
+            margin-top: 16px;
+        }
+        
+        .auth-links a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-links a:hover {
+            color: #059669;
+            text-decoration: underline;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 576px) {
+            .auth-body {
+                padding: 24px;
             }
-
-            h1 {
-                font-size: 2rem;
-                margin-bottom: 1rem;
-            }
-
-            .loginContainer {
-                background-color: rgba(0, 0, 0, 0.5);
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-                width: 300px;
-                text-align: center;
-            }
-
-            input {
-                width: 100%;
-                padding: 10px;
-                margin: 10px 0;
-                border: none;
-                border-radius: 4px;
-                font-size: 1rem;
-            }
-
-            label {
-                font-size: 1rem;
-                display: block;
-                margin-bottom: 5px;
-            }
-
-            button {
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                padding: 10px;
-                width: 100%;
-                border-radius: 4px;
-                font-size: 1rem;
-                cursor: pointer;
-            }
-
-            button:hover {
-                background-color: #45a049;
-            }
-
-            a {
-                color: #4CAF50;
-                text-decoration: none;
-                font-size: 1rem;
-            }
-
-            a:hover {
-                text-decoration: underline;
-            }
-
-            p {
-                font-size: 0.9rem;
-                color: #ddd;
-            }
-
-            .message {
-                color: red;
-                font-size: 1rem;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Sign Up for Komli</h1>
-        <div class="loginContainer">
-            {% if message %}
-                <p class="message">{{ message }}</p>
-            {% endif %}
-            <form id="registerForm" action="{{ webdir }}/register" method="POST">
-                <label for="registerEmail">Email:</label>
-                <input type="email" id="loginEmail" name="email" placeholder="Email" required>
-
-                <label for="registerName">Name:</label>
-                <input type="text" id="registerName" name="name" placeholder="Name" required>
-
-                <label for="registerPhone">Phone Number:</label>
-                <input type="tel" id="registerPhone" name="phone" placeholder="Phone Number">
-
-                <label for="loginPassword">Password:</label>
-                <input type="password" id="loginPassword" name="password" placeholder="Password" required>
-
-                <label for="registerPassword">Repeat Password:</label>
-                <input type="password" id="registerPassword" name="confirm_password" placeholder="Type password again" required>
-
-                <div>
-                    <input type="checkbox" id="registerAgreement" required>
-                    <label for="registerAgreement">I agree to the <a href="#agreement">Terms of Service</a></label>
-
-                    <input type="checkbox" id="registerSubscribe">
-                    <label for="registerSubscribe">I would like to subscribe to the newsletter</label>
-                </div>
-
-                <p>Have an account? <a href="{{ webdir }}/login">Login</a>!</p>
-
-                <button type="submit" title="Sign Up">Sign Up</button>
-            </form>
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-body">
+                {% if message %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ message }}
+                    </div>
+                {% endif %}
+                
+                <form id="registerForm" action="{{ webdir }}/register" method="POST" novalidate>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="registerName" name="name" placeholder="John Doe" required>
+                                <label for="registerName">
+                                    <i class="fas fa-user me-2"></i>Full Name
+                                </label>
+                                <div class="invalid-feedback">Please enter your full name.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="loginEmail" name="email" placeholder="name@example.com" required>
+                                <label for="loginEmail">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                                <div class="invalid-feedback">Please enter a valid email address.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input type="tel" class="form-control" id="registerPhone" name="phone" placeholder="+1 (555) 123-4567">
+                        <label for="registerPhone">
+                            <i class="fas fa-phone me-2"></i>Phone Number (Optional)
+                        </label>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Password" required>
+                        <label for="loginPassword">
+                            <i class="fas fa-lock me-2"></i>Password
+                        </label>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-meter">
+                                <div class="strength-fill"></div>
+                            </div>
+                            <div class="strength-text text-muted">Password strength: <span id="strengthLabel">Too weak</span></div>
+                        </div>
+                        <div class="invalid-feedback">Password must be at least 8 characters long.</div>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="registerPassword" name="confirm_password" placeholder="Confirm Password" required>
+                        <label for="registerPassword">
+                            <i class="fas fa-lock me-2"></i>Confirm Password
+                        </label>
+                        <div class="invalid-feedback">Passwords do not match.</div>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="registerAgreement" required>
+                        <label class="form-check-label" for="registerAgreement">
+                            I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                        </label>
+                        <div class="invalid-feedback">You must agree to the terms and conditions.</div>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="registerSubscribe">
+                        <label class="form-check-label" for="registerSubscribe">
+                            Send me updates and news about Komli
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success" id="registerBtn">
+                        <span class="btn-text">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </span>
+                        <div class="loading-spinner"></div>
+                    </button>
+                    
+                    <div class="auth-links">
+                        <span class="text-muted">Already have an account? </span>
+                        <a href="{{ webdir }}/login">Sign in here</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <p>&copy; QuickMash</p>
-    </body>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form validation
+        const form = document.getElementById('registerForm');
+        const inputs = form.querySelectorAll('.form-control');
+        
+        inputs.forEach(input => {
+            input.addEventListener('blur', validateField);
+            input.addEventListener('input', validateField);
+        });
+        
+        function validateField(e) {
+            const input = e.target;
+            const isValid = input.checkValidity();
+            
+            if (input.name === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(input.value)) {
+                    input.setCustomValidity('Please enter a valid email address');
+                } else {
+                    input.setCustomValidity('');
+                }
+            }
+            
+            if (input.name === 'confirm_password') {
+                const password = document.getElementById('loginPassword').value;
+                if (input.value !== password) {
+                    input.setCustomValidity('Passwords do not match');
+                } else {
+                    input.setCustomValidity('');
+                }
+            }
+            
+            input.classList.toggle('is-valid', input.checkValidity() && input.value.length > 0);
+            input.classList.toggle('is-invalid', !input.checkValidity() && input.value.length > 0);
+        }
+        
+        // Password strength checker
+        const passwordInput = document.getElementById('loginPassword');
+        const strengthMeter = document.getElementById('passwordStrength');
+        const strengthLabel = document.getElementById('strengthLabel');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const strength = calculatePasswordStrength(password);
+            
+            strengthMeter.className = 'password-strength strength-' + strength.level;
+            strengthLabel.textContent = strength.label;
+            strengthLabel.style.color = strength.color;
+        });
+        
+        function calculatePasswordStrength(password) {
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (password.match(/[a-z]+/)) score++;
+            if (password.match(/[A-Z]+/)) score++;
+            if (password.match(/[0-9]+/)) score++;
+            if (password.match(/[$@#&!]+/)) score++;
+            
+            const levels = [
+                { level: 'weak', label: 'Too weak', color: '#ef4444' },
+                { level: 'weak', label: 'Weak', color: '#ef4444' },
+                { level: 'fair', label: 'Fair', color: '#f59e0b' },
+                { level: 'good', label: 'Good', color: '#10b981' },
+                { level: 'strong', label: 'Strong', color: '#059669' }
+            ];
+            
+            return levels[score] || levels[0];
+        }
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+            
+            if (form.checkValidity()) {
+                const btn = document.getElementById('registerBtn');
+                const btnText = btn.querySelector('.btn-text');
+                const spinner = btn.querySelector('.loading-spinner');
+                
+                btn.disabled = true;
+                btnText.style.display = 'none';
+                spinner.style.display = 'inline-block';
+                
+                // Re-enable after 5 seconds to prevent permanent disable
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btnText.style.display = 'inline';
+                    spinner.style.display = 'none';
+                }, 5000);
+            }
+        });
+        
+        // Auto-focus first input
+        window.addEventListener('load', function() {
+            document.getElementById('registerName').focus();
+        });
+    </script>
+</body>
 </html>
