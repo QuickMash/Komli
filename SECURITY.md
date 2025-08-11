@@ -1,12 +1,16 @@
-# Security Policy
+# 🛡️ Security Policy
 
-## Supported Versions
-
+## 📦 Supported Versions
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| 0.1.x   | ✅ Yes             |
 
-## Reporting a Vulnerability
+## 🐞 Reporting a Vulnerability
 
-Feel free to message me on Discord if you find a vulnerability. `quickmash` is my Discord account, or create an issue.
+If you discover a security vulnerability, please help us keep the project safe:
+
+- **Contact:** Message `quickmash` on Discord  
+- **Alternative:** [Open a GitHub Issue](../../issues/new?template=security.md)
+
+We appreciate responsible disclosure and will respond promptly to all reports. Thank you for helping improve our security!
