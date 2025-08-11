@@ -4,6 +4,8 @@
 ![GitHub Tag](https://img.shields.io/github/v/tag/QuickMash/Komli)
 ![GitHub last commit](https://img.shields.io/github/last-commit/QuickMash/Komli)
 
+![Komli Chat Screenshot](screenshots/chat.png)
+
 ---
 
 **Komli** is a conversational AI web app built with Python.

@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Komli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .profile-container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .profile-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .profile-card-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px 30px;
+            border-bottom: none;
+        }
+        
+        .profile-card-body {
+            padding: 30px;
+        }
+        
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-upload:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .form-floating {
+            margin-bottom: 20px;
+        }
+        
+        .form-floating > .form-control {
+            background: rgba(248, 250, 252, 0.8);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            height: auto;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-floating > .form-control:focus {
+            background: white;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-floating > label {
+            padding: 16px 20px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+            background: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+        
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #059669;
+            border: 2px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 2px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(248, 250, 252, 0.8);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            background: white;
+            border-color: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .back-button {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            color: rgba(255, 255, 255, 0.8);
+            transform: translateX(-4px);
+        }
+        
+        .divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+        }
+        
+        #sharebtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-gradient);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            z-index: 10;
+        }
+        
+        #sharebtn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+        
+        #sharebtn:active {
+            transform: translateY(0) scale(0.95);
+        }
+        
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .share-modal.active {
+            display: flex;
+        }
+        
+        .share-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: shareModalSlide 0.3s ease;
+        }
+        
+        @keyframes shareModalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .share-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .share-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #374151;
+        }
+        
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .share-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .share-option i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .share-option.twitter { border-color: #1da1f2; }
+        .share-option.twitter:hover { background: rgba(29, 161, 242, 0.1); }
+        .share-option.twitter i { color: #1da1f2; }
+        
+        .share-option.facebook { border-color: #4267b2; }
+        .share-option.facebook:hover { background: rgba(66, 103, 178, 0.1); }
+        .share-option.facebook i { color: #4267b2; }
+        
+        .share-option.linkedin { border-color: #0077b5; }
+        .share-option.linkedin:hover { background: rgba(0, 119, 181, 0.1); }
+        .share-option.linkedin i { color: #0077b5; }
+        
+        .share-option.whatsapp { border-color: #25d366; }
+        .share-option.whatsapp:hover { background: rgba(37, 211, 102, 0.1); }
+        .share-option.whatsapp i { color: #25d366; }
+        
+        .share-option.copy { border-color: #667eea; }
+        .share-option.copy:hover { background: rgba(102, 126, 234, 0.1); }
+        .share-option.copy i { color: #667eea; }
+        
+        .share-link {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(248, 250, 252, 0.8);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+        
+        .share-link input {
+            width: 100%;
+            border: none;
+            background: none;
+            outline: none;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-header,
+            .profile-card-body {
+                padding: 20px;
+            }
+            
+            .profile-card-header {
+                padding: 16px 20px;
+            }
+            
+            .profile-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">
+                        <i class="fas fa-user me-3" style="color: #667eea;"></i>Profile
+                    </h1>
+                    <p class="mb-0 text-muted">Manage your account information</p>
+                </div>
+                <a href="/" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Chat
+                </a>
+            </div>
+        </div>
+
+        {% if message %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endif %}
+
+        <!-- Profile Overview -->
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-id-card me-2"></i>Profile Overview
+                </h5>
+            </div>
+            <div class="profile-card-body">
+                <div id="sharebtn" onclick="handleShare()" title="Share Profile">
+                    <i class="fa fa-share-alt"></i>
+                </div>
+                <div class="avatar-section">
+                    <div class="avatar">
+                        {{ user.name[0]|upper if user and user.name else 'U' }}
+                        <div class="avatar-upload" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-camera" style="font-size: 0.75rem;"></i>
+                        </div>
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                    </div>
+                    <h4 class="mb-1">{{ user.name if user else 'Unknown User' }}</h4>
+                    <p class="text-muted mb-0">{{ user.email if user else 'No email' }}</p>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ stats.conversation_count if stats else 0 }}</div>
+                        <div class="stat-label">Conversations</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            {% if stats and stats.message_count %}
+                                {% if stats.message_count >= 1000 %}
+                                    {{ "%.1f"|format(stats.message_count / 1000.0) }}k
+                                {% else %}
+                                    {{ stats.message_count }}
+                                {% endif %}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </div>
+                        <div class="stat-label">Messages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ stats.days_active if stats else 0 }}</div>
+                        <div class="stat-label">Days Active</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile -->
+        <form action="/profile" method="POST" id="profileForm">
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Personal Information
+                    </h5>
+                </div>
+                <div class="profile-card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ user.name if user else '' }}" placeholder="Full Name">
+                                <label for="name">
+                                    <i class="fas fa-user me-2"></i>Full Name
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ user.email if user else '' }}" placeholder="Email" readonly>
+                                <label for="email">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="tel" class="form-control" id="phone" name="phone" 
+                               value="{{ user.phone if user else '' }}" placeholder="Phone Number">
+                        <label for="phone">
+                            <i class="fas fa-phone me-2"></i>Phone Number
+                        </label>
+                    </div>
+
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="location" name="location" 
+                               placeholder="City, Country">
+                        <label for="location">
+                            <i class="fas fa-map-marker-alt me-2"></i>Location
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo me-2"></i>Reset
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Change Password -->
+        <form action="/profile" method="POST" id="passwordForm">
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </h5>
+                </div>
+                <div class="profile-card-body">
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="current_password" name="current_password" 
+                               placeholder="Current Password" required>
+                        <label for="current_password">
+                            <i class="fas fa-key me-2"></i>Current Password
+                        </label>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="new_password" name="new_password" 
+                                       placeholder="New Password" required>
+                                <label for="new_password">
+                                    <i class="fas fa-lock me-2"></i>New Password
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                       placeholder="Confirm Password" required>
+                                <label for="confirm_password">
+                                    <i class="fas fa-lock me-2"></i>Confirm Password
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary" onclick="clearPasswordForm()">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shield-alt me-2"></i>Update Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Account Actions -->
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Account Actions
+                </h5>
+            </div>
+            <div class="profile-card-body">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Export Data</strong>
+                            <div class="text-muted small">Download your chat history and account data</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary">
+                            <i class="fas fa-download me-2"></i>Export
+                        </button>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Delete Account</strong>
+                            <div class="text-muted small">Permanently delete your account and all data</div>
+                        </div>
+                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                            <i class="fas fa-trash me-2"></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal">
+        <div class="share-content">
+            <button class="share-close" onclick="closeShareModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <h4 class="mb-3">
+                <i class="fas fa-share-alt me-2" style="color: #667eea;"></i>
+                Share Profile
+            </h4>
+            <p class="text-muted mb-4">Share your Komli profile with others</p>
+            
+            <div class="share-options">
+                <div class="share-option twitter" onclick="shareToTwitter()">
+                    <i class="fab fa-twitter"></i>
+                    <span>Twitter</span>
+                </div>
+                
+                <div class="share-option facebook" onclick="shareToFacebook()">
+                    <i class="fab fa-facebook-f"></i>
+                    <span>Facebook</span>
+                </div>
+                
+                <div class="share-option linkedin" onclick="shareToLinkedIn()">
+                    <i class="fab fa-linkedin-in"></i>
+                    <span>LinkedIn</span>
+                </div>
+                
+                <div class="share-option whatsapp" onclick="shareToWhatsApp()">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>WhatsApp</span>
+                </div>
+                
+                <div class="share-option copy" onclick="copyProfileLink()">
+                    <i class="fas fa-copy"></i>
+                    <span>Copy Link</span>
+                </div>
+            </div>
+            
+            <div class="share-link">
+                <label class="form-label small text-muted mb-2">Profile Link:</label>
+                <input type="text" id="profileLink" readonly onclick="this.select()">
+            </div>
+            
+            <div class="mt-4">
+                <h6 class="mb-2">Stats to Share:</h6>
+                <div class="d-flex justify-content-around text-center">
+                    <div>
+                        <strong class="d-block" style="color: #667eea;">
+                            {{ stats.conversation_count if stats else 0 }}
+                        </strong>
+                        <small class="text-muted">Conversations</small>
+                    </div>
+                    <div>
+                        <strong class="d-block" style="color: #667eea;">
+                            {% if stats and stats.message_count %}
+                                {% if stats.message_count >= 1000 %}
+                                    {{ "%.1f"|format(stats.message_count / 1000.0) }}k
+                                {% else %}
+                                    {{ stats.message_count }}
+                                {% endif %}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </strong>
+                        <small class="text-muted">Messages</small>
+                    </div>
+                    <div>
+                        <strong class="d-block" style="color: #667eea;">
+                            {{ stats.days_active if stats else 0 }}
+                        </strong>
+                        <small class="text-muted">Days Active</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Profile form handling
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Submit the form
+                this.submit();
+            }, 500);
+        });
+
+        // Password form handling
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                
+                // Show error
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-2"></i>Passwords do not match
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                const container = document.querySelector('.profile-container');
+                const header = container.querySelector('.profile-header');
+                container.insertBefore(alertDiv, header.nextSibling);
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+            
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+            submitBtn.disabled = true;
+            
+            // Submit the form
+            setTimeout(() => {
+                this.submit();
+            }, 500);
+        });
+
+        // Avatar upload handling
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatar = document.querySelector('.avatar');
+                    avatar.style.backgroundImage = `url(${e.target.result})`;
+                    avatar.style.backgroundSize = 'cover';
+                    avatar.style.backgroundPosition = 'center';
+                    avatar.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all changes?')) {
+                document.getElementById('profileForm').reset();
+            }
+        }
+
+        function clearPasswordForm() {
+            document.getElementById('passwordForm').reset();
+        }
+
+        function confirmDelete() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                if (confirm('This will permanently delete all your data. Are you absolutely sure?')) {
+                    // Handle account deletion
+                    alert('Account deletion functionality would be implemented here.');
+                }
+            }
+        }
+
+        // Password strength indicator
+        document.getElementById('new_password').addEventListener('input', function() {
+            const password = this.value;
+            const strength = calculatePasswordStrength(password);
+            
+            // Remove existing strength indicator
+            const existing = this.parentNode.querySelector('.password-strength');
+            if (existing) existing.remove();
+            
+            if (password.length > 0) {
+                const strengthDiv = document.createElement('div');
+                strengthDiv.className = 'password-strength';
+                strengthDiv.style.cssText = 'margin-top: 8px; font-size: 0.875rem;';
+                
+                const strengthText = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'][strength];
+                const strengthColor = ['#dc2626', '#f59e0b', '#eab308', '#10b981', '#059669'][strength];
+                
+                strengthDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+                            <div style="width: ${(strength + 1) * 20}%; height: 100%; background: ${strengthColor}; transition: all 0.3s ease;"></div>
+                        </div>
+                        <span style="color: ${strengthColor}; font-weight: 500;">${strengthText}</span>
+                    </div>
+                `;
+                
+                this.parentNode.appendChild(strengthDiv);
+            }
+        });
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            return Math.min(strength, 4);
+        }
+        
+        // Share functionality
+        function openShareModal() {
+            const modal = document.getElementById('shareModal');
+            const profileLink = document.getElementById('profileLink');
+            
+            // Generate profile link (you can customize this URL)
+            const baseUrl = window.location.origin;
+            const userName = `{{ user.name|replace(' ', '') if user else 'User' }}`;
+            const profileUrl = `${baseUrl}/profile/{{ user.email if user else 'user' }}`;
+            
+            profileLink.value = profileUrl;
+            modal.classList.add('active');
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeShareModal() {
+            const modal = document.getElementById('shareModal');
+            modal.classList.remove('active');
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+        
+        function shareToTwitter() {
+            const userName = `{{ user.name if user else 'User' }}`;
+            const messageCount = parseInt('{{ stats.message_count if stats else 0 }}');
+            const conversationCount = parseInt('{{ stats.conversation_count if stats else 0 }}');
+            
+            const text = `Check out my Komli AI profile! I've had ${conversationCount} conversations and sent ${messageCount} messages. Join me on Komli!`;
+            const url = document.getElementById('profileLink').value;
+            
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+        }
+        
+        function shareToFacebook() {
+            const url = document.getElementById('profileLink').value;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        }
+        
+        function shareToLinkedIn() {
+            const url = document.getElementById('profileLink').value;
+            const title = `{{ user.name if user else 'User' }}'s Komli AI Profile`;
+            const summary = "Check out my AI chat statistics on Komli!";
+            
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary)}`, '_blank');
+        }
+        
+        function shareToWhatsApp() {
+            const userName = `{{ user.name if user else 'User' }}`;
+            const messageCount = parseInt('{{ stats.message_count if stats else 0 }}');
+            const conversationCount = parseInt('{{ stats.conversation_count if stats else 0 }}');
+            
+            const text = `Hey! Check out my Komli AI profile! I've had ${conversationCount} conversations and sent ${messageCount} messages. Join me on Komli!`;
+            const url = document.getElementById('profileLink').value;
+            
+            window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+        }
+        
+        function copyProfileLink() {
+            const profileLink = document.getElementById('profileLink');
+            profileLink.select();
+            
+            // Modern clipboard API
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(profileLink.value).then(() => {
+                    showCopySuccess();
+                }).catch(() => {
+                    // Fallback for older browsers
+                    document.execCommand('copy');
+                    showCopySuccess();
+                });
+            } else {
+                // Fallback for older browsers
+                document.execCommand('copy');
+                showCopySuccess();
+            }
+        }
+        
+        function showCopySuccess() {
+            const copyBtn = document.querySelector('.share-option.copy');
+            const originalContent = copyBtn.innerHTML;
+            
+            copyBtn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
+            copyBtn.style.background = 'rgba(34, 197, 94, 0.1)';
+            copyBtn.style.borderColor = '#22c55e';
+            copyBtn.querySelector('i').style.color = '#22c55e';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalContent;
+                copyBtn.style.background = '';
+                copyBtn.style.borderColor = '#667eea';
+                copyBtn.querySelector('i').style.color = '#667eea';
+            }, 2000);
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('shareModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeShareModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeShareModal();
+            }
+        });
+        
+        // Web Share API support (for mobile devices)
+        if (navigator.share) {
+            // Add a small indicator for mobile share support
+            const shareBtn = document.getElementById('sharebtn');
+            const originalTitle = shareBtn.getAttribute('title');
+            shareBtn.setAttribute('title', originalTitle + ' (Native sharing available)');
+        }
+        
+        // Handle native share vs custom modal
+        function handleShare() {
+            if (navigator.share) {
+                const userName = `{{ user.name if user else 'User' }}`;
+                const messageCount = parseInt('{{ stats.message_count if stats else 0 }}');
+                const conversationCount = parseInt('{{ stats.conversation_count if stats else 0 }}');
+                const profileUrl = document.getElementById('profileLink') ? document.getElementById('profileLink').value : window.location.href;
+                
+                navigator.share({
+                    title: `${userName}'s Komli AI Profile`,
+                    text: `Check out my Komli AI profile! I've had ${conversationCount} conversations and sent ${messageCount} messages.`,
+                    url: profileUrl
+                }).catch(() => {
+                    // Fallback to custom modal if Web Share API fails
+                    openShareModal();
+                });
+            } else {
+                openShareModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@ import signal
 import time
 import threading
 import configparser
-from flask import Flask, request, render_template, jsonify, send_file
+from flask import Flask, request, render_template, jsonify, send_file, make_response, redirect, url_for
 from markupsafe import Markup
 import processing.ai as ai
 import processing.mdprocessor as md
@@ -44,7 +44,15 @@ def randIMG():
 # Flask Routing
 @app.route(webdir)
 def home():
-    return render_template('index.html')
+    # Send user data to page so it can be used for things like login status or username
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+        if debug:
+            print(f"User data retrieved: {user_data}")
+    
+    return render_template('index.html', user=user_data)
 
 @app.route(f'{webdir}/login')
 def login_page():
@@ -60,8 +68,15 @@ def login():
     password = request.form.get('password')
 
     if server.login(email, password):
-        return render_template('index.html')
+        # Create response and set cookie
+        response = make_response(redirect(url_for('home')))
+        response.set_cookie('user', email, max_age=60*60*24*30)  # 30 days
+        if debug:
+            print(f"User {email} logged in successfully")
+        return response
     else:
+        if debug:
+            print(f"Login failed for {email}")
         return render_template('login.html', error="Invalid credentials")
 
 @app.route(f'{webdir}/register')
@@ -78,7 +93,7 @@ def register():
 
     if password == password_confirm:
         if debug:
-            print("Failed")
+            print("Password confirmation passed")
         if server.register(email, name, phone, password):
             if debug:
                 print("User Registered!")
@@ -90,17 +105,171 @@ def register():
     else:
         if debug:
                 print("Passwords don't match")
-        return render_template('register.html', message="Passwords do not match")        
+        return render_template('register.html', message="Passwords do not match")
+
+@app.route(f'{webdir}/logout')
+def logout():
+    response = make_response(redirect(url_for('home')))
+    response.set_cookie('user', '', expires=0)
+    if debug:
+        print("User logged out")
+    return response
+
+@app.route(f'{webdir}/settings')
+def settings():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return redirect(url_for('login_page'))
+    
+    return render_template('settings.html', user=user_data)
+
+@app.route(f'{webdir}/settings', methods=['POST'])
+def update_settings():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return redirect(url_for('login_page'))
+    
+    # Handle settings updates here
+    # For now, just redirect back to settings with a success message
+    return render_template('settings.html', user=user_data, message="Settings updated successfully!")
+
+@app.route(f'{webdir}/profile')
+def profile():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return redirect(url_for('login_page'))
+    
+    # Get user statistics
+    user_stats = server.get_user_stats(user_data['email'])
+    
+    return render_template('profile.html', user=user_data, stats=user_stats)
+
+@app.route(f'{webdir}/history')
+def chat_history():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return redirect(url_for('login_page'))
+    
+    # Get recent conversations
+    conversations = server.get_recent_conversations(user_data['email'], limit=20)
+    
+    return render_template('history.html', user=user_data, conversations=conversations)
+
+@app.route(f'{webdir}/profile/<email>')
+def public_profile(email):
+    # Get user data for the requested profile
+    user_data = server.get_user_data(email)
+    
+    if not user_data:
+        return render_template('404.html'), 404
+    
+    # Get user statistics
+    user_stats = server.get_user_stats(email)
+    
+    return render_template('public_profile.html', profile_user=user_data, stats=user_stats)
+
+@app.route(f'{webdir}/profile', methods=['POST'])
+def update_profile():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return redirect(url_for('login_page'))
+    
+    # Get form data
+    name = request.form.get('name')
+    phone = request.form.get('phone')
+    current_password = request.form.get('current_password')
+    new_password = request.form.get('new_password')
+    
+    # Update profile logic here
+    try:
+        if name and name != user_data['name']:
+            # Update name in database
+            server.update_user_field(user_data['email'], 'name', name)
+            
+        if phone and phone != user_data['phone']:
+            # Update phone in database
+            server.update_user_field(user_data['email'], 'phone', phone)
+            
+        if current_password and new_password:
+            # Verify current password and update if correct
+            if server.login(user_data['email'], current_password):
+                server.update_user_field(user_data['email'], 'password', server.hash_password(new_password))
+            else:
+                # Get updated user data
+                updated_user_data = server.get_user_data(user_data['email'])
+                return render_template('profile.html', user=updated_user_data, error="Current password is incorrect")
+        
+        # Get updated user data
+        updated_user_data = server.get_user_data(user_data['email'])
+        return render_template('profile.html', user=updated_user_data, message="Profile updated successfully!")
+        
+    except Exception as e:
+        if debug:
+            print(f"Error updating profile: {e}")
+        return render_template('profile.html', user=user_data, error="Failed to update profile. Please try again.")        
 
 @app.route(f'{webdir}/respond', methods=['POST'])
 def respond():
     user_input = request.form.get('user_input')
     if not user_input:
         return jsonify({"error": "No input provided"}), 400
+    
+    # Get user data if logged in
+    user_email = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+        if not user_data:
+            user_email = None  # Invalid cookie
+    
     try:
         ai.modTokens("user", user_input)
         system_response = ai.send(user_input)
         markdown_response = md.convert(system_response)
+        
+        # Log the conversation if user is logged in
+        if user_email:
+            try:
+                # Get or create an active conversation
+                conversation_id = server.get_or_create_active_conversation(user_email)
+                
+                # Add user message
+                server.add_message(conversation_id, user_email, 'user', user_input)
+                
+                # Add assistant response
+                server.add_message(conversation_id, user_email, 'assistant', system_response)
+                
+                if debug:
+                    print(f"Logged conversation for user {user_email}")
+            except Exception as e:
+                if debug:
+                    print(f"Failed to log conversation: {e}")
+        
         return Markup(markdown_response)
     except Exception as e:
         return jsonify({"error": f"Failed: {e}"}), 500

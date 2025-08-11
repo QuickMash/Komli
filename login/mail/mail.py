@@ -4,18 +4,11 @@ import secrets
 import sqlite3
 
 
-reset_password_html_message = """
-<html>
-    <head></head>
-    <body>
-    <h1>Reset Password</h1>
-    <a href="https://example.com/reset?id={code}">Reset Password</a>
-    <p>Someone has requested a reset password, if this was not you, you can safely ignore this message</p>
-    </body>
-</html>
-"""
+# Unfinished file for handling email functionality
 
-def reset_password(email)
+# Site will have a page to enter a code from an email to reset password
+
+def reset_password(email):
     """
     Sends a reset password request to email
     """

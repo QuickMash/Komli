@@ -161,6 +161,12 @@
     </style>
 </head>
 <body>
+    {% if user %}
+    <!-- If the user is logged in, redirect them to the home page -->
+        <script>
+            window.location.href = "{{ url_for('home') }}";
+        </script>
+    {% endif %}
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-body">
