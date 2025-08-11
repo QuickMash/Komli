@@ -21,6 +21,9 @@ debug = bool(config["SYSTEM"]["debug"].strip('"'))
 app = Flask(__name__)
 stop_event = threading.Event()
 
+# Initialize database on startup
+server.createdb()
+
 def handle_signal(signum, frame):
     stop_event.set()
 

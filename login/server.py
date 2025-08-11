@@ -32,6 +32,11 @@ def closedb():
 
 def createdb():
     """Creates the required tables in the database if they do not exist."""
+    # Ensure the database directory exists
+    db_dir = os.path.dirname(DATABASE)
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir)
+    
     db = sqlite3.connect(DATABASE)
     cursor = db.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS users (
