@@ -1,0 +1,80 @@
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.egg
+*.egg-info/
+
+# Configuration files that may contain sensitive data
+config.cfg
+*.conf
+*.ini
+.env
+.env.local
+.env.*.local
+
+# Log files
+*.log
+logs/
+
+# API keys and secrets
+secrets/
+keys/
+*.key
+*.pem
+*.crt
+*.p12
+
+# User data and uploads
+uploads/
+user_data/
+temp/
+tmp/
+
+# Email and communication files
+mail/
+emails/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node modules (if any)
+node_modules/
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Personal and sensitive directories
+personal/
+private/
+sensitive/
