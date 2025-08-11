@@ -37,5 +37,6 @@ Use the installer located at `/installer/installer.py` for easy configuration ed
 ---
 
 ## Komli 0.1.1 (In Development)
-- Login support.
-- Markdown rendering.
+- [x] Login support
+- [x] Markdown rendering
+- [ ] Chat history & New chat support
