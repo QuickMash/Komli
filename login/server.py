@@ -87,7 +87,6 @@ def register(email, name, phone, password):
     hashed_password = hasher.hash(password)
     cursor.execute("INSERT INTO users (email, name, password, tokens, email_reset, phone) VALUES (?, ?, ?, ?, ?, ?)", 
                    (email, name, hashed_password, "", "", phone))
-    print("created user")
     db.commit()
 
     if config.has_section('TOKEN_LIMIT') and config['TOKEN_LIMIT'].getboolean('join_reward_enable'):
@@ -104,14 +103,13 @@ def login(email, password):
     cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
     user = cursor.fetchone()
     
-    if not user:  
-        print("Error: User does not exist")
+    if not user:
         db.close()
-        return False
-
-    # user is a tuple, so access by index
-    if not hasher.verify(password, user[2]):  # password is at index 2
-        print("Error: Incorrect password")
+        return False    # user is a tuple, so access by index
+    if hasher.check(password, user[2]):
+        db.close()
+        return True
+    else:
         db.close()
         return False
 
@@ -321,6 +319,55 @@ def get_or_create_active_conversation(user_email):
     except Exception as e:
         db.close()
         return create_conversation(user_email)
+
+def get_conversation(conversation_id, user_email):
+    """Gets a specific conversation if it belongs to the user."""
+    db = sqlite3.connect(DATABASE)
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            SELECT id, title, created_at, updated_at
+            FROM conversations 
+            WHERE id = ? AND user_email = ?
+        """, (conversation_id, user_email))
+        result = cursor.fetchone()
+        db.close()
+        
+        if result:
+            return {
+                'id': result[0],
+                'title': result[1],
+                'created_at': result[2],
+                'updated_at': result[3]
+            }
+        return None
+    except Exception as e:
+        db.close()
+        return None
+
+def get_conversation_messages(conversation_id):
+    """Gets all messages for a specific conversation."""
+    db = sqlite3.connect(DATABASE)
+    cursor = db.cursor()
+    try:
+        cursor.execute("""
+            SELECT id, message_type, content, created_at
+            FROM messages 
+            WHERE conversation_id = ?
+            ORDER BY created_at ASC
+        """, (conversation_id,))
+        messages = cursor.fetchall()
+        db.close()
+        
+        return [{
+            'id': msg[0],
+            'message_type': msg[1],
+            'content': msg[2],
+            'created_at': msg[3]
+        } for msg in messages]
+    except Exception as e:
+        db.close()
+        return []
 
 app = Flask(__name__)
 

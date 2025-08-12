@@ -52,10 +52,11 @@ def home():
     if 'user' in request.cookies:
         user_email = request.cookies.get('user')
         user_data = server.get_user_data(user_email)
-        if debug:
-            print(f"User data retrieved: {user_data}")
     
-    return render_template('index.html', user=user_data)
+    # Get conversation_id from URL parameters if provided
+    conversation_id = request.args.get('conversation_id')
+    
+    return render_template('index.html', user=user_data, conversation_id=conversation_id)
 
 @app.route(f'{webdir}/login')
 def login_page():
@@ -74,12 +75,8 @@ def login():
         # Create response and set cookie
         response = make_response(redirect(url_for('home')))
         response.set_cookie('user', email, max_age=60*60*24*30)  # 30 days
-        if debug:
-            print(f"User {email} logged in successfully")
         return response
     else:
-        if debug:
-            print(f"Login failed for {email}")
         return render_template('login.html', error="Invalid credentials")
 
 @app.route(f'{webdir}/register')
@@ -95,27 +92,17 @@ def register():
     name = request.form.get('name')
 
     if password == password_confirm:
-        if debug:
-            print("Password confirmation passed")
         if server.register(email, name, phone, password):
-            if debug:
-                print("User Registered!")
             return render_template('login.html', message="Registration successful! Please log in.")
         else:
-            if debug:
-                print("Failed to register")
             return render_template('register.html', message="Registration failed, please try again later") 
     else:
-        if debug:
-                print("Passwords don't match")
         return render_template('register.html', message="Passwords do not match")
 
 @app.route(f'{webdir}/logout')
 def logout():
     response = make_response(redirect(url_for('home')))
     response.set_cookie('user', '', expires=0)
-    if debug:
-        print("User logged out")
     return response
 
 @app.route(f'{webdir}/settings')
@@ -178,6 +165,32 @@ def chat_history():
     
     return render_template('history.html', user=user_data, conversations=conversations)
 
+# Route to start a new chat (redirects to home with new conversation)
+@app.route(f'{webdir}/new_chat')
+def new_chat():
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    if not user_data:
+        return redirect(url_for('login_page'))
+    conversation_id = server.create_conversation(user_data['email'])
+    return redirect(url_for('home') + f'?conversation_id={conversation_id}')
+
+# Route to view a specific chat/conversation (redirects to home with conversation)
+@app.route(f'{webdir}/chat/<int:conversation_id>')
+def chat(conversation_id):
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    if not user_data:
+        return redirect(url_for('login_page'))
+    conversation = server.get_conversation(conversation_id, user_data['email'])
+    if not conversation:
+        return render_template('404.html'), 404
+    return redirect(url_for('home') + f'?conversation_id={conversation_id}')
+
 @app.route(f'{webdir}/profile/<email>')
 def public_profile(email):
     # Get user data for the requested profile
@@ -232,13 +245,13 @@ def update_profile():
         return render_template('profile.html', user=updated_user_data, message="Profile updated successfully!")
         
     except Exception as e:
-        if debug:
-            print(f"Error updating profile: {e}")
         return render_template('profile.html', user=user_data, error="Failed to update profile. Please try again.")        
 
 @app.route(f'{webdir}/respond', methods=['POST'])
 def respond():
     user_input = request.form.get('user_input')
+    conversation_id = request.form.get('conversation_id')  # Optional conversation ID
+    
     if not user_input:
         return jsonify({"error": "No input provided"}), 400
     
@@ -258,29 +271,92 @@ def respond():
         # Log the conversation if user is logged in
         if user_email:
             try:
-                # Get or create an active conversation
-                conversation_id = server.get_or_create_active_conversation(user_email)
+                # Use provided conversation_id or get/create active conversation
+                if conversation_id:
+                    # Verify the conversation belongs to the user
+                    conv = server.get_conversation(int(conversation_id), user_email)
+                    if conv:
+                        target_conversation_id = int(conversation_id)
+                    else:
+                        target_conversation_id = server.get_or_create_active_conversation(user_email)
+                else:
+                    target_conversation_id = server.get_or_create_active_conversation(user_email)
                 
                 # Add user message
-                server.add_message(conversation_id, user_email, 'user', user_input)
+                server.add_message(target_conversation_id, user_email, 'user', user_input)
                 
                 # Add assistant response
-                server.add_message(conversation_id, user_email, 'assistant', system_response)
+                server.add_message(target_conversation_id, user_email, 'assistant', system_response)
                 
-                if debug:
-                    print(f"Logged conversation for user {user_email}")
             except Exception as e:
-                if debug:
-                    print(f"Failed to log conversation: {e}")
+                pass
         
         return Markup(markdown_response)
     except Exception as e:
         return jsonify({"error": f"Failed: {e}"}), 500
 
+# API endpoint for fetching conversations
+@app.route(f'{webdir}/api/conversations')
+def api_conversations():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    # Get recent conversations
+    conversations = server.get_recent_conversations(user_data['email'], limit=10)
+    
+    return jsonify({"conversations": conversations})
+
+# API endpoint for creating new conversation
+@app.route(f'{webdir}/api/new-conversation', methods=['POST'])
+def api_new_conversation():
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    # Create new conversation
+    conversation_id = server.create_conversation(user_data['email'])
+    
+    if conversation_id:
+        return jsonify({"conversation_id": conversation_id})
+    else:
+        return jsonify({"error": "Failed to create conversation"}), 500
+
+# API endpoint for fetching conversation messages
+@app.route(f'{webdir}/api/conversation/<int:conversation_id>/messages')
+def api_conversation_messages(conversation_id):
+    # Check if user is logged in
+    user_data = None
+    if 'user' in request.cookies:
+        user_email = request.cookies.get('user')
+        user_data = server.get_user_data(user_email)
+    
+    if not user_data:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    # Verify the conversation belongs to the user
+    conversation = server.get_conversation(conversation_id, user_data['email'])
+    if not conversation:
+        return jsonify({"error": "Conversation not found"}), 404
+    
+    # Get conversation messages
+    messages = server.get_conversation_messages(conversation_id)
+    
+    return jsonify({"messages": messages})
+
 # For a random background
 @app.route(f'{webdir}/background.jpg')
 def background():
-    print(server.listUsers())
     time.sleep(5)
     return send_file(randIMG(), mimetype='image/png')
 
@@ -292,7 +368,6 @@ if __name__ == '__main__':
         try:
             app.run(debug=True, use_reloader=False, host='0.0.0.0', port=webport)
         except Exception as e:
-            print(f"Failed to start app: {e}")
             stop_event.set()
             time.sleep(1)
             quit(e)

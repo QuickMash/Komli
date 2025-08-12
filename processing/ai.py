@@ -1,5 +1,5 @@
 import configparser
-from ollama import chat
+import ollama
 
 # Load configuration
 config = configparser.ConfigParser()
@@ -15,23 +15,19 @@ token_limit = config.get('TOKEN_LIMIT', 'limit_user').strip('"')
 def modTokens(user: str, user_input: str) -> None:
     if user_input:
         try:
-            response = chat(model=aimodel, messages=[{"role": "user", "content": user_input}])
-            tokens = response.get('eval_count', 0)
+            # Get token estimation - create simple messages for token counting
+            messages = [{'role': 'user', 'content': user_input}]
+            response = ollama.chat(model=config.get('DEFAULT', 'model'), messages=messages, options={"num_predict": 1})
+            tokens = response.get('prompt_eval_count', 0) + response.get('eval_count', 0)
             
-            print(f"Tokens used: {tokens}")
-
-            if token_limit.strip('"') == 'True':
-                import login.server as logins
-                current_tokens = logins.getTokens(user)  # Get user tokens
-                if int(current_tokens) >= 1:
-                    logins.setTokens(user, max(0, current_tokens - tokens))  # Prevent negative tokens
-                else:
-                    print("Oh Help me, your out of tokens!")
-                    return response.get('message', {}).get('content', "Sorry, I can't answer that, it seems you are out of tokens.")
-
-
+            if config.getboolean('TOKEN_LIMIT', 'limit_user'):
+                if tokens > int(config.get('TOKEN_LIMIT', 'daily_tokens')):
+                    if config.getboolean('TOKEN_LIMIT', 'token_reset'):
+                        return "You've exceeded your daily token limit."
+                    else:
+                        return "You don't have enough tokens for this request."
         except Exception as e:
-            print(f"Error estimating tokens: {e}")
+            pass  # Continue without token estimation if it fails
 
 def send(user_input: str) -> str:
     system_message = {
@@ -47,8 +43,7 @@ def send(user_input: str) -> str:
     messages = [system_message, user_message]
     
     try:
-        response = chat(model=aimodel, messages=messages)
-        return response.get('message', {}).get('content', 'Error: No response from AI')
+        response = ollama.chat(model=aimodel, messages=messages)
+        return response['message']['content']
     except Exception as e:
-        print(f"Error in AI response: {e}")
-        return "Error: AI failed to respond."
+        return f"Sorry, I encountered an error: {str(e)}"

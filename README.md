@@ -40,10 +40,20 @@
 
 ## 📦 Release Notes
 
-### Komli 0.1.1 _(In Development)_
-- [x] Login support
-- [x] Markdown rendering
-- [ ] Chat history & new chat support
+### Komli 0.2.0 _(In Development)_ - Planned Production Ready
+- [ ] Admin Dashboard
+- [ ] Theme/Plugin support
+- [ ] OAuth Support
+- [ ] Support to upload images for profile pictures
+- [ ] Allow users to limit their message length
+- [ ] Support for multiple models (e.g., qwen:0.5b, qwen:1b, deepseek, etc.)
+- [ ] Admin token limits (limit users)
+
+#### Possible updates
+- [ ] Payment support (Stripe)
+- [ ] Hugging Face support 😀
+
+### Komli 0.1.1 _(Released)_
 
 ### Komli 0.1.0 _(Released)_
 - Initial public release
