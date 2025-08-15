@@ -24,9 +24,9 @@
        python3 /installer/installer.py
        ```
 2. **Install Your Model**
-    - Download and run your desired model:
+    - Download your desired model:
        ```bash
-       ollama run [Model Name]
+       ollama pull [Model Name]
        ```
 3. **Launch the Application**
     - Start the main app:
