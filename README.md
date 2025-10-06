@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-   <a href="https://github.com/QuickMash/Komli/commits"><img src="https://img.shields.io/github/commits-since/QuickMash/Komli/0.1.0" alt="GitHub commits since tagged version"></a>
+   <a href="https://github.com/QuickMash/Komli/commits"><img src="https://img.shields.io/github/commits-since/QuickMash/Komli/0.1.1" alt="GitHub commits since tagged version"></a>
    <a href="https://github.com/QuickMash/Komli/tags"><img src="https://img.shields.io/github/v/tag/QuickMash/Komli" alt="GitHub Tag"></a>
    <a href="https://github.com/QuickMash/Komli/commits"><img src="https://img.shields.io/github/last-commit/QuickMash/Komli" alt="GitHub last commit"></a>
 </p>
