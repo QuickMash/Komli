@@ -28,6 +28,7 @@
        ```bash
        ollama pull [Model Name]
        ```
+       (Dont forget to set it in the config)
 3. **Launch the Application**
     - Start the main app:
        ```bash
