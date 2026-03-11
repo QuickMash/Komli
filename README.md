@@ -43,7 +43,8 @@
 
 ### Komli 0.2.0 _(In Development)_ - Planned Production Ready
 - [ ] Admin Dashboard
-- [ ] Theme/Plugin support
+- [ ] Theme support
+- [x] Plugin support
 - [ ] OAuth Support
 - [ ] Support to upload images for profile pictures
 - [ ] Allow users to limit their message length
