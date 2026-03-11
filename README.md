@@ -12,7 +12,7 @@
 
 ---
 
-**Komli** is a conversational AI web application built with Python, designed for seamless and interactive chat experiences.
+**Komli** is a conversational AI web application built with Python, designed for
 
 ---
 
