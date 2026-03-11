@@ -10,63 +10,85 @@ import processing.mdprocessor as md
 import login.server as server  # Now we import the server module
 import random
 
+# Import Plugins
+for plugin in os.listdir('plugins'):
+    if plugin.endswith('.py'): # Only import .py files
+        # TODO: Add a warning prompt for untrusted plugins
+        __import__(f'plugins.{plugin[:-3]}')
+
 config = configparser.ConfigParser()
 config.read("config.cfg")
 
-webdir = config['Web']['webdir'].strip('"')
-webport = int(config['Web']['port'].strip('"'))
-debug = bool(config["SYSTEM"]["debug"].strip('"'))
+web_dir = config['Web']['webdir'].strip('"')
+web_port = int(config['Web']['port'].strip('"'))
+debug_mode = bool(config["SYSTEM"]["debug"].strip('"'))
 
 # Flask App Setup
 app = Flask(__name__)
 stop_event = threading.Event()
 
+def get_authenticated_user():
+    """Resolve the authenticated user from cookie, preferring internal user id."""
+    user_id = request.cookies.get('user_id')
+    if user_id:
+        try:
+            user_id_int = int(user_id)
+            user_data = server.get_user_data_by_id(user_id_int)
+            if user_data:
+                return user_data
+        except (TypeError, ValueError):
+            pass
+
+    # Backward compatibility for existing sessions that still store email.
+    legacy_user_email = request.cookies.get('user')
+    if legacy_user_email:
+        return server.get_user_data(legacy_user_email)
+
+    return None
+
 # Initialize database on startup
 server.createdb()
 
-def handle_signal(signum, frame):
+def handle_signal(_signum, _frame):
     stop_event.set()
 
 signal.signal(signal.SIGINT, handle_signal)
 signal.signal(signal.SIGTERM, handle_signal)
 
-def randIMG():
+def random_image_path():
     img_dir = os.path.join(os.getcwd(), "templates", "img")
     
     if not os.path.exists(img_dir):
         return None
     
-    imgs = [f for f in os.listdir(img_dir) if f.endswith(".jpg")]
+    image_files = [file_name for file_name in os.listdir(img_dir) if file_name.endswith(".jpg")]
     
-    if not imgs:
+    if not image_files:
         return None
     
-    randomimg = random.choice(imgs)
-    return os.path.join(img_dir, randomimg)
+    random_image = random.choice(image_files)
+    return os.path.join(img_dir, random_image)
 
 # Flask Routing
-@app.route(webdir)
+@app.route(web_dir)
 def home():
     # Send user data to page so it can be used for things like login status or username
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     # Get conversation_id from URL parameters if provided
     conversation_id = request.args.get('conversation_id')
     
     return render_template('index.html', user=user_data, conversation_id=conversation_id)
 
-@app.route(f'{webdir}/login')
+@app.route(f'{web_dir}/login')
 def login_page():
     return render_template('login.html')
 
-@app.route(f'{webdir}/reset')
+@app.route(f'{web_dir}/reset')
 def reset_pass():
     return render_template('reset.html')
 
-@app.route(f'{webdir}/login', methods=['POST'])
+@app.route(f'{web_dir}/login', methods=['POST'])
 def login():
     email = request.form.get('email')
     password = request.form.get('password')
@@ -74,16 +96,18 @@ def login():
     if server.login(email, password):
         # Create response and set cookie
         response = make_response(redirect(url_for('home')))
-        response.set_cookie('user', email, max_age=60*60*24*30)  # 30 days
+        user_id = server.get_user_id(email)
+        response.set_cookie('user_id', str(user_id), max_age=60*60*24*30, httponly=True, samesite='Lax')
+        response.set_cookie('user', '', expires=0)
         return response
     else:
         return render_template('login.html', error="Invalid credentials")
 
-@app.route(f'{webdir}/register')
+@app.route(f'{web_dir}/register')
 def register_page():
     return render_template('register.html')
 
-@app.route(f'{webdir}/register', methods=['POST'])
+@app.route(f'{web_dir}/register', methods=['POST'])
 def register():
     email = request.form.get('email')
     password = request.form.get('password')
@@ -99,32 +123,27 @@ def register():
     else:
         return render_template('register.html', message="Passwords do not match")
 
-@app.route(f'{webdir}/logout')
+@app.route(f'{web_dir}/logout')
 def logout():
     response = make_response(redirect(url_for('home')))
     response.set_cookie('user', '', expires=0)
+    response.set_cookie('user_id', '', expires=0)
     return response
 
-@app.route(f'{webdir}/settings')
+@app.route(f'{web_dir}/settings')
 def settings():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return redirect(url_for('login_page'))
     
     return render_template('settings.html', user=user_data)
 
-@app.route(f'{webdir}/settings', methods=['POST'])
+@app.route(f'{web_dir}/settings', methods=['POST'])
 def update_settings():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return redirect(url_for('login_page'))
@@ -133,13 +152,10 @@ def update_settings():
     # For now, just redirect back to settings with a success message
     return render_template('settings.html', user=user_data, message="Settings updated successfully!")
 
-@app.route(f'{webdir}/profile')
+@app.route(f'{web_dir}/profile')
 def profile():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return redirect(url_for('login_page'))
@@ -149,13 +165,10 @@ def profile():
     
     return render_template('profile.html', user=user_data, stats=user_stats)
 
-@app.route(f'{webdir}/history')
+@app.route(f'{web_dir}/history')
 def chat_history():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return redirect(url_for('login_page'))
@@ -166,24 +179,18 @@ def chat_history():
     return render_template('history.html', user=user_data, conversations=conversations)
 
 # Route to start a new chat (redirects to home with new conversation)
-@app.route(f'{webdir}/new_chat')
+@app.route(f'{web_dir}/new_chat')
 def new_chat():
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     if not user_data:
         return redirect(url_for('login_page'))
     conversation_id = server.create_conversation(user_data['email'])
     return redirect(url_for('home') + f'?conversation_id={conversation_id}')
 
 # Route to view a specific chat/conversation (redirects to home with conversation)
-@app.route(f'{webdir}/chat/<int:conversation_id>')
+@app.route(f'{web_dir}/chat/<int:conversation_id>')
 def chat(conversation_id):
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     if not user_data:
         return redirect(url_for('login_page'))
     conversation = server.get_conversation(conversation_id, user_data['email'])
@@ -191,7 +198,7 @@ def chat(conversation_id):
         return render_template('404.html'), 404
     return redirect(url_for('home') + f'?conversation_id={conversation_id}')
 
-@app.route(f'{webdir}/profile/<email>')
+@app.route(f'{web_dir}/profile/<email>')
 def public_profile(email):
     # Get user data for the requested profile
     user_data = server.get_user_data(email)
@@ -204,13 +211,10 @@ def public_profile(email):
     
     return render_template('public_profile.html', profile_user=user_data, stats=user_stats)
 
-@app.route(f'{webdir}/profile', methods=['POST'])
+@app.route(f'{web_dir}/profile', methods=['POST'])
 def update_profile():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return redirect(url_for('login_page'))
@@ -244,10 +248,10 @@ def update_profile():
         updated_user_data = server.get_user_data(user_data['email'])
         return render_template('profile.html', user=updated_user_data, message="Profile updated successfully!")
         
-    except Exception as e:
+    except Exception:
         return render_template('profile.html', user=user_data, error="Failed to update profile. Please try again.")        
 
-@app.route(f'{webdir}/respond', methods=['POST'])
+@app.route(f'{web_dir}/respond', methods=['POST'])
 def respond():
     user_input = request.form.get('user_input')
     conversation_id = request.form.get('conversation_id')  # Optional conversation ID
@@ -256,15 +260,12 @@ def respond():
         return jsonify({"error": "No input provided"}), 400
     
     # Get user data if logged in
-    user_email = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
-        if not user_data:
-            user_email = None  # Invalid cookie
+    user_data = get_authenticated_user()
+    user_email = user_data['email'] if user_data else None
+    user_id = user_data['id'] if user_data else None
     
     try:
-        ai.modTokens("user", user_input)
+        ai.modTokens(str(user_id) if user_id else "guest", user_input)
         system_response = ai.send(user_input)
         markdown_response = md.convert(system_response)
         
@@ -274,8 +275,8 @@ def respond():
                 # Use provided conversation_id or get/create active conversation
                 if conversation_id:
                     # Verify the conversation belongs to the user
-                    conv = server.get_conversation(int(conversation_id), user_email)
-                    if conv:
+                    conversation_record = server.get_conversation(int(conversation_id), user_email)
+                    if conversation_record:
                         target_conversation_id = int(conversation_id)
                     else:
                         target_conversation_id = server.get_or_create_active_conversation(user_email)
@@ -288,21 +289,18 @@ def respond():
                 # Add assistant response
                 server.add_message(target_conversation_id, user_email, 'assistant', system_response)
                 
-            except Exception as e:
+            except Exception:
                 pass
         
         return Markup(markdown_response)
-    except Exception as e:
-        return jsonify({"error": f"Failed: {e}"}), 500
+    except Exception as error:
+        return jsonify({"error": f"Failed: {error}"}), 500
 
 # API endpoint for fetching conversations
-@app.route(f'{webdir}/api/conversations')
+@app.route(f'{web_dir}/api/conversations')
 def api_conversations():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return jsonify({"error": "Not authenticated"}), 401
@@ -313,13 +311,10 @@ def api_conversations():
     return jsonify({"conversations": conversations})
 
 # API endpoint for creating new conversation
-@app.route(f'{webdir}/api/new-conversation', methods=['POST'])
+@app.route(f'{web_dir}/api/new-conversation', methods=['POST'])
 def api_new_conversation():
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return jsonify({"error": "Not authenticated"}), 401
@@ -333,13 +328,10 @@ def api_new_conversation():
         return jsonify({"error": "Failed to create conversation"}), 500
 
 # API endpoint for fetching conversation messages
-@app.route(f'{webdir}/api/conversation/<int:conversation_id>/messages')
+@app.route(f'{web_dir}/api/conversation/<int:conversation_id>/messages')
 def api_conversation_messages(conversation_id):
     # Check if user is logged in
-    user_data = None
-    if 'user' in request.cookies:
-        user_email = request.cookies.get('user')
-        user_data = server.get_user_data(user_email)
+    user_data = get_authenticated_user()
     
     if not user_data:
         return jsonify({"error": "Not authenticated"}), 401
@@ -355,10 +347,10 @@ def api_conversation_messages(conversation_id):
     return jsonify({"messages": messages})
 
 # For a random background
-@app.route(f'{webdir}/background.jpg')
+@app.route(f'{web_dir}/background.jpg')
 def background():
     time.sleep(5)
-    return send_file(randIMG(), mimetype='image/png')
+    return send_file(random_image_path(), mimetype='image/png')
 
 if __name__ == '__main__':
     if config['DEFAULT'].get('clean_console', 'False').strip('"') == "True":
@@ -366,11 +358,11 @@ if __name__ == '__main__':
     time.sleep(0.5)
     def start_app():
         try:
-            app.run(debug=True, use_reloader=False, host='0.0.0.0', port=webport)
-        except Exception as e:
+            app.run(debug=debug_mode, use_reloader=False, host='0.0.0.0', port=web_port)
+        except Exception as error:
             stop_event.set()
             time.sleep(1)
-            quit(e)
+            quit(error)
     app_thread = threading.Thread(target=start_app)
     app_thread.start()
     try:

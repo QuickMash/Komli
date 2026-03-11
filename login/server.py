@@ -41,16 +41,19 @@ def createdb():
     cursor = db.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS users (
         email TEXT PRIMARY KEY,
+        id INTEGER UNIQUE AUTOINCREMENT,
         name TEXT,
         password TEXT,
         tokens TEXT,
         email_reset TEXT,
         phone TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                   
     )""")
     cursor.execute("""CREATE TABLE IF NOT EXISTS tokens (
-        user TEXT PRIMARY KEY,
-        value TEXT
+        i
+        used TEXT,
+        max TEXT
     )""")
     cursor.execute("""CREATE TABLE IF NOT EXISTS conversations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,13 +103,15 @@ def login(email, password):
     """Authenticates a user. Returns False if the user does not exist or password is incorrect."""
     db = sqlite3.connect(DATABASE)
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    cursor.execute("SELECT password FROM users WHERE email = ?", (email,))
     user = cursor.fetchone()
     
     if not user:
         db.close()
-        return False    # user is a tuple, so access by index
-    if hasher.check(password, user[2]):
+        return False
+
+    stored_password = user[0]
+    if hasher.verify(password, stored_password):
         db.close()
         return True
     else:
@@ -147,21 +152,56 @@ def listUsers():
     db.close()
     return users
 
+def listUserIds():
+    """Lists all user IDs in the database."""
+    db = opendb()
+    cursor = db.cursor()
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+    return user_ids
+
 def get_user_data(email):
     """Retrieves user data for a given email."""
     db = sqlite3.connect(DATABASE)
     cursor = db.cursor()
-    cursor.execute("SELECT email, name, phone FROM users WHERE email = ?", (email,))
+    cursor.execute("SELECT id, email, name, phone FROM users WHERE email = ?", (email,))
     user = cursor.fetchone()
     db.close()
     
     if user:
         return {
-            'email': user[0],
-            'name': user[1], 
-            'phone': user[2]
+            'id': user[0],
+            'email': user[1],
+            'name': user[2], 
+            'phone': user[3]
         }
     return None
+
+def get_user_data_by_id(user_id):
+    """Retrieves user data for a given internal user id."""
+    db = sqlite3.connect(DATABASE)
+    cursor = db.cursor()
+    cursor.execute("SELECT id, email, name, phone FROM users WHERE id = ?", (user_id,))
+    user = cursor.fetchone()
+    db.close()
+
+    if user:
+        return {
+            'id': user[0],
+            'email': user[1],
+            'name': user[2],
+            'phone': user[3]
+        }
+    return None
+
+def get_user_id(email):
+    """Gets internal user id for an email."""
+    db = sqlite3.connect(DATABASE)
+    cursor = db.cursor()
+    cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+    row = cursor.fetchone()
+    db.close()
+    return row[0] if row else None
 
 def update_user_field(email, field, value):
     """Updates a specific field for a user."""
@@ -186,7 +226,7 @@ def update_user_field(email, field, value):
 
 def hash_password(password):
     """Hashes a password using the hasher module."""
-    return hasher.hash_password(password)
+    return hasher.hash(password)
 
 def create_conversation(user_email, title="New Chat"):
     """Creates a new conversation for a user."""

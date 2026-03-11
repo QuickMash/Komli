@@ -8,6 +8,8 @@ def hash(password):
 
 def verify(password, hashed):
     """Verifies password against hashed password."""
+    if isinstance(hashed, str):
+        hashed = hashed.encode()
     if bcrypt.checkpw(password.encode(), hashed):
         return True
     else:

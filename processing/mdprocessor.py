@@ -1,7 +1,7 @@
 import markdown
 import re
 
-codeblockid = 0
+code_block_id = 0
 
 def extract_code_blocks(html):
     """ Extracts content inside <pre><code> blocks and replaces them with placeholders """
@@ -16,14 +16,14 @@ def extract_code_blocks(html):
 
 def restore_code_blocks(html, code_blocks):
     """ Restores saved code content inside <pre><code> blocks """
-    global codeblockid  # Ensure we're modifying the global codeblockid
-    for i, block in enumerate(code_blocks):
+    global code_block_id  # Ensure we're modifying the global code block id
+    for _, block in enumerate(code_blocks):
         html = html.replace(
-            f"<!--CODE_BLOCK_{codeblockid}-->",
-            f'<div class="copybtn"><button onclick="copyToClipboard(\'codeblock-{codeblockid}\')" id="copybtn-{codeblockid}">copy <i class="fa-regular fa-copy"></i></button></div>'
-            f'<div class="codeblock"<code id="codeblock-{codeblockid}"><pre>{block}</pre></code></div>'
+            f"<!--CODE_BLOCK_{code_block_id}-->",
+            f'<div class="copybtn"><button onclick="copyToClipboard(\'codeblock-{code_block_id}\')" id="copybtn-{code_block_id}">copy <i class="fa-regular fa-copy"></i></button></div>'
+            f'<div class="codeblock"<code id="codeblock-{code_block_id}"><pre>{block}</pre></code></div>'
         )
-        codeblockid += 1
+        code_block_id += 1
     return html
 
 def convert(markdown_text):
@@ -33,8 +33,8 @@ def convert(markdown_text):
     - Removing <p> tags outside of code blocks
     - Adding copy buttons for code blocks
     """
-    global codeblockid  # Ensure we're modifying the global codeblockid
-    codeblockid = 0  # Reset the codeblockid for each new Markdown processing
+    global code_block_id  # Ensure we're modifying the global code block id
+    code_block_id = 0  # Reset the code block id for each new Markdown processing
     # Convert Markdown to HTML with fenced code blocks enabled
     html_output = markdown.markdown(markdown_text, extensions=['fenced_code'])
 
@@ -50,7 +50,7 @@ def convert(markdown_text):
     return html_output
 
 # JavaScript function for copying
-js_copy_script = """
+copy_script = """
 <script>
 function copyToClipboard(id) {
     var codeElement = document.getElementById(id);
