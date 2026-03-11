@@ -255,43 +255,50 @@ def update_profile():
 def respond():
     user_input = request.form.get('user_input')
     conversation_id = request.form.get('conversation_id')  # Optional conversation ID
-    
+
     if not user_input:
         return jsonify({"error": "No input provided"}), 400
-    
+
     # Get user data if logged in
     user_data = get_authenticated_user()
     user_email = user_data['email'] if user_data else None
     user_id = user_data['id'] if user_data else None
-    
-    try:
-        ai.modTokens(str(user_id) if user_id else "guest", user_input)
-        system_response = ai.send(user_input)
-        markdown_response = md.convert(system_response)
-        
-        # Log the conversation if user is logged in
-        if user_email:
-            try:
-                # Use provided conversation_id or get/create active conversation
-                if conversation_id:
-                    # Verify the conversation belongs to the user
-                    conversation_record = server.get_conversation(int(conversation_id), user_email)
-                    if conversation_record:
-                        target_conversation_id = int(conversation_id)
-                    else:
-                        target_conversation_id = server.get_or_create_active_conversation(user_email)
+    user_name = user_data['name'] if user_data else None
+
+    # Resolve the target conversation and retrieve its history before calling the AI
+    history = []
+    target_conversation_id = None
+
+    if user_email:
+        try:
+            if conversation_id:
+                conversation_record = server.get_conversation(int(conversation_id), user_email)
+                if conversation_record:
+                    target_conversation_id = int(conversation_id)
                 else:
                     target_conversation_id = server.get_or_create_active_conversation(user_email)
-                
-                # Add user message
+            else:
+                target_conversation_id = server.get_or_create_active_conversation(user_email)
+
+            # Fetch existing messages so the AI sees the full conversation history
+            if target_conversation_id:
+                history = server.get_conversation_messages(target_conversation_id)
+        except Exception:
+            pass
+
+    try:
+        ai.modTokens(str(user_id) if user_id else "guest", user_input)
+        system_response = ai.send(user_input, history=history, user_name=user_name)
+        markdown_response = md.convert(system_response)
+
+        # Log the conversation if user is logged in
+        if user_email and target_conversation_id:
+            try:
                 server.add_message(target_conversation_id, user_email, 'user', user_input)
-                
-                # Add assistant response
                 server.add_message(target_conversation_id, user_email, 'assistant', system_response)
-                
             except Exception:
                 pass
-        
+
         return Markup(markdown_response)
     except Exception as error:
         return jsonify({"error": f"Failed: {error}"}), 500
@@ -345,6 +352,23 @@ def api_conversation_messages(conversation_id):
     messages = server.get_conversation_messages(conversation_id)
     
     return jsonify({"messages": messages})
+
+# API endpoint for searching conversations
+@app.route(f'{web_dir}/api/search')
+def api_search():
+    # Check if user is logged in
+    user_data = get_authenticated_user()
+
+    if not user_data:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    query = request.args.get('q', '').strip()
+
+    if not query:
+        return jsonify({"results": []})
+
+    results = server.search_conversations(user_data['email'], query)
+    return jsonify({"results": results})
 
 # For a random background
 @app.route(f'{web_dir}/background.jpg')

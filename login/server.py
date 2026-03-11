@@ -409,6 +409,36 @@ def get_conversation_messages(conversation_id):
         db.close()
         return []
 
+def search_conversations(user_email, query):
+    """Searches conversations and messages for a given user by keyword."""
+    db = sqlite3.connect(DATABASE)
+    cursor = db.cursor()
+    try:
+        # Escape LIKE wildcards so user input is treated as a literal string
+        escaped = query.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+        like_query = f'%{escaped}%'
+        cursor.execute("""
+            SELECT DISTINCT c.id, c.title, c.updated_at,
+                   (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id) as message_count
+            FROM conversations c
+            LEFT JOIN messages m ON c.id = m.conversation_id
+            WHERE c.user_email = ?
+              AND (c.title LIKE ? ESCAPE '\\' OR m.content LIKE ? ESCAPE '\\')
+            ORDER BY c.updated_at DESC
+            LIMIT 20
+        """, (user_email, like_query, like_query))
+        results = cursor.fetchall()
+        db.close()
+        return [{
+            'id': r[0],
+            'title': r[1],
+            'updated_at': r[2],
+            'message_count': r[3]
+        } for r in results]
+    except Exception:
+        db.close()
+        return []
+
 app = Flask(__name__)
 
 @app.teardown_appcontext
