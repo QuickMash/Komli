@@ -16,6 +16,9 @@
 
 ---
 
+** AI Being used on this **
+Copilot being used? My friend challanged me to make AI with AI, so i thought this counted...
+
 ## 🚀 Getting Started
 
 1. **Configure & Install Dependencies**
