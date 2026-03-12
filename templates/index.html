@@ -371,6 +371,55 @@
             color: white;
         }
         
+        /* Search Input Styles */
+        .sidebar-search {
+            margin-bottom: 16px;
+        }
+
+        .sidebar-search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 8px 36px 8px 12px;
+            color: white;
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .sidebar-search-wrapper {
+            position: relative;
+        }
+
+        .sidebar-search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+
+        .search-results-section {
+            margin-left: 16px;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            padding-left: 16px;
+            margin-top: 4px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
         /* Chat History Sub-section Styles */
         .chat-history-section {
             margin-left: 16px;
@@ -586,6 +635,22 @@
             <div class="sidebar-brand">
                 <h5><i class="fas fa-robot me-2"></i>Komli</h5>
             </div>
+
+            {% if user %}
+            <!-- Search -->
+            <div class="sidebar-search">
+                <div class="sidebar-search-wrapper">
+                    <input type="text" class="sidebar-search-input" id="sidebarSearch"
+                           placeholder="Search conversations..."
+                           oninput="handleSearchInput(this.value)">
+                    <i class="fas fa-search sidebar-search-icon"></i>
+                </div>
+                <!-- Search Results -->
+                <div class="search-results-section" id="searchResultsSection" style="display: none;">
+                    <div id="searchResultsList"></div>
+                </div>
+            </div>
+            {% endif %}
             
             <nav class="nav flex-column">
                 <a href="#" class="nav-link active" onclick="startNewChat(event)">
@@ -701,6 +766,8 @@
     <script>
         // Global variables
         const userLoggedIn = {% if user %}true{% else %}false{% endif %};
+        const SEARCH_DEBOUNCE_MS = 300;
+        const MAX_SEARCH_RESULT_TITLE_LENGTH = 22;
         
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -1070,6 +1137,59 @@
             if (window.innerWidth <= 768) {
                 toggleSidebar();
             }
+        }
+
+        // Search functionality
+        let searchTimeout = null;
+
+        function handleSearchInput(query) {
+            const resultsSection = document.getElementById('searchResultsSection');
+            clearTimeout(searchTimeout);
+
+            if (!query.trim()) {
+                resultsSection.style.display = 'none';
+                return;
+            }
+
+            // Debounce: wait SEARCH_DEBOUNCE_MS after the user stops typing
+            searchTimeout = setTimeout(() => performSearch(query.trim()), SEARCH_DEBOUNCE_MS);
+        }
+
+        function performSearch(query) {
+            const resultsSection = document.getElementById('searchResultsSection');
+            const resultsList = document.getElementById('searchResultsList');
+
+            resultsSection.style.display = 'block';
+            resultsList.innerHTML = '<div class="text-center py-2"><i class="fas fa-spinner fa-spin"></i></div>';
+
+            fetch('/api/search?q=' + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    resultsList.innerHTML = '';
+                    if (data.results && data.results.length > 0) {
+                        data.results.forEach(conv => {
+                            const item = document.createElement('div');
+                            item.className = 'conversation-item';
+                            item.onclick = () => {
+                                loadConversation(conv.id);
+                                document.getElementById('sidebarSearch').value = '';
+                                resultsSection.style.display = 'none';
+                            };
+                            const title = conv.title || `Chat #${conv.id}`;
+                            const truncatedTitle = title.length > MAX_SEARCH_RESULT_TITLE_LENGTH ? title.substring(0, MAX_SEARCH_RESULT_TITLE_LENGTH) + '...' : title;
+                            item.innerHTML = `
+                                <div class="conversation-title">${escapeHtml(truncatedTitle)}</div>
+                                <div class="conversation-meta">${conv.message_count} messages</div>
+                            `;
+                            resultsList.appendChild(item);
+                        });
+                    } else {
+                        resultsList.innerHTML = '<div class="text-center py-2"><small class="text-muted">No results found</small></div>';
+                    }
+                })
+                .catch(() => {
+                    resultsList.innerHTML = '<div class="text-center py-2"><small class="text-muted">Search failed</small></div>';
+                });
         }
     </script>
 </body>

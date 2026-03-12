@@ -28,19 +28,23 @@ def modTokens(user: str, user_input: str) -> None:
     """Backward-compatible alias for mod_tokens."""
     return mod_tokens(user, user_input)
 
-def send(user_input: str) -> str:
+def send(user_input: str, history: list = None, user_name: str = None) -> str:
+    name_part = f" You are talking to {user_name}." if user_name else ""
     system_message = {
         'role': 'system',
-        'content': f'You are {name}. {sys_prompt} Version: {version}. You are only allowed to speak with markdown formatting. Begin normal messages with ` and end them with `'
+        'content': f'You are {name}. {sys_prompt}{name_part} Version: {version}. You are only allowed to speak with markdown formatting. Begin normal messages with ` and end them with `'
     }
-    
-    user_message = {
-        'role': 'user',
-        'content': user_input
-    }
-    
-    messages = [system_message, user_message]
-    
+
+    messages = [system_message]
+
+    # Include prior conversation turns so the AI has memory of the chat
+    if history:
+        for msg in history:
+            role = 'user' if msg.get('message_type') == 'user' else 'assistant'
+            messages.append({'role': role, 'content': msg['content']})
+
+    messages.append({'role': 'user', 'content': user_input})
+
     try:
         response = ollama.chat(model=ai_model, messages=messages)
         return response['message']['content']
